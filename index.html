@@ -561,7 +561,7 @@
 
         /* ===== FLAVORS SECTION ===== */
         .flavors {
-            padding: 0.5rem 5%;
+            padding: 5rem 5%;
             background: white;
         }
 
@@ -1133,7 +1133,7 @@
             <li><a href="#about">About</a></li>
             <li><a href="branch.html">Branch</a></li>
             <li><a href="contact.html">Contact</a></li>
-            <li><a href="franchise.html" style="color: #FFD700;">Franchise Enquiry</a></li>
+            <li><a href="franchise.html">Franchise Enquiry</a></li>
         </ul>
         <div class="nav-right">
             <button class="hamburger-btn" id="hamburgerBtn">
@@ -1147,7 +1147,7 @@
                 <a href="#about">ABOUT</a>
                 <a href="branch.html">BRANCH</a>
                 <a href="contact.html">CONTACT</a>
-                <a href="franchise.html" style="color: #FFD700;">FRANCHISE ENQUIRY</a>
+                <a href="franchise.html">FRANCHISE ENQUIRY</a>
             </div>
         </div>
     </nav>
@@ -1175,11 +1175,51 @@
         </div>
     </section>
 
+    <!-- Why JOJO Section -->
+    <section class="why-jojo" style="padding: 5rem 5%; background: linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, rgba(255, 230, 230, 0.5) 20%, rgba(255, 230, 230, 0.5) 80%, rgba(255, 255, 255, 0) 100%); text-align: center;">
+        <h2 class="section-title scroll-reveal" style="margin-bottom: 4rem;">Why JOJO ice creams?</h2>
+        
+        <div class="about-values scroll-reveal" style="margin-bottom: 3rem;">
+            <div class="value-card">
+                <div class="value-icon">🍦</div>
+                <h4>Premium brand pure ice creams</h4>
+            </div>
+            <div class="value-card">
+                <div class="value-icon">💰</div>
+                <h4>Affordable cost</h4>
+            </div>
+            <div class="value-card">
+                <div class="value-icon">✨</div>
+                <h4>Quality you can feel, ingredients you can trust</h4>
+            </div>
+        </div>
+
+        <div class="hospitality-text scroll-reveal" style="max-width: 800px; margin: 0 auto; background: linear-gradient(135deg, rgba(220,20,60,0.05) 0%, rgba(139,0,0,0.05) 100%); padding: 2rem; border-radius: 20px; border: 2px solid var(--primary-pink);">
+            <p style="font-size: 1.2rem; color: var(--dark-text); font-weight: 500; font-style: italic; line-height: 1.6; margin: 0;">
+                "Step in for ice cream, stay for the hospitality - where your privacy is honored and good vibes are always on the menus"
+            </p>
+        </div>
+    </section>
+
     <!-- Flavors Section -->
     <section class="flavors" id="flavors">
         <h2 class="section-title">Explore Our Flavours</h2>
         <p class="section-subtitle"><span class="taste-text">Taste Then</span> <span class="order-text">Order</span></p>
         
+        <!-- Category Buttons -->
+        <div class="categories-filter" style="text-align: center; margin-bottom: 3rem;">
+            <h3 style="font-size: 1.8rem; color: var(--dark-text); margin-bottom: 1.5rem; font-family: 'League Spartan', sans-serif;">Categories</h3>
+            <div style="display: flex; justify-content: center; gap: 1.5rem; flex-wrap: wrap;">
+                <a href="#scoop-ice-creams" class="btn btn-secondary" style="text-decoration: none;">Scoop Ice Creams</a>
+                <a href="#milkshakes" class="btn btn-secondary" style="text-decoration: none;">Milk Shakes</a>
+            </div>
+        </div>
+
+        <!-- Scoop Ice Creams Section Heading -->
+        <div id="scoop-ice-creams" style="text-align: center; margin: 4rem 0 3rem;">
+            <h2 style="font-size: 2.2rem; font-weight: 800; color: var(--accent-pink); font-family: 'League Spartan', sans-serif; letter-spacing: 1px;">Scoop Ice Creams</h2>
+        </div>
+
         <!-- Regular Category -->
         <div class="flavor-category">
             <h3 class="category-title">Regular</h3>
@@ -1643,7 +1683,330 @@
                 </div>
             </div>
         </div>
-    </section>
+
+        <!-- Milkshakes Category -->
+        <div class="flavor-category milkshakes-section" id="milkshakes">
+            <div style="text-align: center; margin: 4rem 0 3rem;">
+                <h2 style="font-size: 2.2rem; font-weight: 800; color: var(--accent-pink); font-family: 'League Spartan', sans-serif; letter-spacing: 1px;">Milkshakes</h2>
+            </div>
+
+            <!-- Regular Category -->
+            <div class="flavor-category" style="margin-top: 2rem;">
+                <h3 class="category-title" style="font-size: 1.6rem; margin-bottom: 1.5rem; color: var(--dark-text);">Regular</h3>
+                <div class="flavors-grid">
+                    <div class="flavor-card scroll-reveal">
+                        <div class="flavor-image"><img src="images/milkshakes/vanilla_milkshake.png" alt="Vanilla Milkshake" onerror="this.src='images/flavors/Vannila.jpeg'"></div>
+                        <div class="flavor-info">
+                            <div class="flavor-name">VANILLA</div>
+                            <div class="flavor-description">Classic vanilla milkshake (300ml)</div>
+                            <div class="flavor-footer"><span class="flavor-price">₹150</span></div>
+                        </div>
+                    </div>
+                    <div class="flavor-card scroll-reveal">
+                        <div class="flavor-image"><img src="images/milkshakes/strawberry_milkshake.png" alt="Strawberry Milkshake" onerror="this.src='images/flavors/Vannila.jpeg'"></div>
+                        <div class="flavor-info">
+                            <div class="flavor-name">STRAWBERRY</div>
+                            <div class="flavor-description">Fresh strawberry milkshake (300ml)</div>
+                            <div class="flavor-footer"><span class="flavor-price">₹150</span></div>
+                        </div>
+                    </div>
+                    <div class="flavor-card scroll-reveal">
+                        <div class="flavor-image"><img src="images/milkshakes/vanilla_milkshake.png" alt="Vanilla Choco Chip Milkshake" onerror="this.src='images/flavors/Vannila.jpeg'"></div>
+                        <div class="flavor-info">
+                            <div class="flavor-name">VANILLA CHOCO CHIP</div>
+                            <div class="flavor-description">Vanilla choco chip milkshake (300ml)</div>
+                            <div class="flavor-footer"><span class="flavor-price">₹150</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Classic Category -->
+            <div class="flavor-category" style="margin-top: 2rem;">
+                <h3 class="category-title" style="font-size: 1.6rem; margin-bottom: 1.5rem; color: var(--dark-text);">Classic</h3>
+                <div class="flavors-grid">
+                    <div class="flavor-card scroll-reveal">
+                        <div class="flavor-image"><img src="images/milkshakes/caramel_milkshake.png" alt="Butterscotch Milkshake" onerror="this.src='images/flavors/Vannila.jpeg'"></div>
+                        <div class="flavor-info">
+                            <div class="flavor-name">BUTTERSCOTCH</div>
+                            <div class="flavor-description">Rich butterscotch milkshake (300ml)</div>
+                            <div class="flavor-footer"><span class="flavor-price">₹150</span></div>
+                        </div>
+                    </div>
+                    <div class="flavor-card scroll-reveal">
+                        <div class="flavor-image"><img src="images/milkshakes/berry_milkshake.png" alt="Black Currant Milkshake" onerror="this.src='images/flavors/Vannila.jpeg'"></div>
+                        <div class="flavor-info">
+                            <div class="flavor-name">BLACK CURRANT</div>
+                            <div class="flavor-description">Tangy black currant milkshake (300ml)</div>
+                            <div class="flavor-footer"><span class="flavor-price">₹150</span></div>
+                        </div>
+                    </div>
+                    <div class="flavor-card scroll-reveal">
+                        <div class="flavor-image"><img src="images/milkshakes/mango_milkshake.png" alt="Kulfi Malai Milkshake" onerror="this.src='images/flavors/Vannila.jpeg'"></div>
+                        <div class="flavor-info">
+                            <div class="flavor-name">KULFI MALAI</div>
+                            <div class="flavor-description">Traditional kulfi milkshake (300ml)</div>
+                            <div class="flavor-footer"><span class="flavor-price">₹150</span></div>
+                        </div>
+                    </div>
+                    <div class="flavor-card scroll-reveal">
+                        <div class="flavor-image"><img src="images/milkshakes/pista_milkshake.png" alt="Pista Milkshake" onerror="this.src='images/flavors/Vannila.jpeg'"></div>
+                        <div class="flavor-info">
+                            <div class="flavor-name">PISTA</div>
+                            <div class="flavor-description">Pistachio delight milkshake (300ml)</div>
+                            <div class="flavor-footer"><span class="flavor-price">₹150</span></div>
+                        </div>
+                    </div>
+                    <div class="flavor-card scroll-reveal">
+                        <div class="flavor-image"><img src="images/milkshakes/chocolate_milkshake.png" alt="Chocolate Milkshake" onerror="this.src='images/flavors/Vannila.jpeg'"></div>
+                        <div class="flavor-info">
+                            <div class="flavor-name">CHOCOLATE</div>
+                            <div class="flavor-description">Rich chocolate milkshake (300ml)</div>
+                            <div class="flavor-footer"><span class="flavor-price">₹150</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Special Category -->
+            <div class="flavor-category" style="margin-top: 2rem;">
+                <h3 class="category-title" style="font-size: 1.6rem; margin-bottom: 1.5rem; color: var(--dark-text);">Special</h3>
+                <div class="flavors-grid">
+                    <div class="flavor-card scroll-reveal">
+                        <div class="flavor-image"><img src="images/milkshakes/exotic_milkshake.png" alt="Black Forest Milkshake" onerror="this.src='images/flavors/Vannila.jpeg'"></div>
+                        <div class="flavor-info">
+                            <div class="flavor-name">BLACK FOREST</div>
+                            <div class="flavor-description">Black forest cake milkshake (300ml)</div>
+                            <div class="flavor-footer"><span class="flavor-price">₹150</span></div>
+                        </div>
+                    </div>
+                    <div class="flavor-card scroll-reveal">
+                        <div class="flavor-image"><img src="images/milkshakes/chocolate_milkshake.png" alt="Oreo Freak Milkshake" onerror="this.src='images/flavors/Vannila.jpeg'"></div>
+                        <div class="flavor-info">
+                            <div class="flavor-name">OREO FREAK</div>
+                            <div class="flavor-description">Oreo cookie milkshake (300ml)</div>
+                            <div class="flavor-footer"><span class="flavor-price">₹150</span></div>
+                        </div>
+                    </div>
+                    <div class="flavor-card scroll-reveal">
+                        <div class="flavor-image"><img src="images/milkshakes/exotic_milkshake.png" alt="Spanish Delight Milkshake" onerror="this.src='images/flavors/Vannila.jpeg'"></div>
+                        <div class="flavor-info">
+                            <div class="flavor-name">SPANISH DELIGHT</div>
+                            <div class="flavor-description">Spanish delight milkshake (300ml)</div>
+                            <div class="flavor-footer"><span class="flavor-price">₹150</span></div>
+                        </div>
+                    </div>
+                    <div class="flavor-card scroll-reveal">
+                        <div class="flavor-image"><img src="images/milkshakes/caramel_milkshake.png" alt="Salted Caramel Milkshake" onerror="this.src='images/flavors/Vannila.jpeg'"></div>
+                        <div class="flavor-info">
+                            <div class="flavor-name">SALTED CARAMEL</div>
+                            <div class="flavor-description">Salted caramel milkshake (300ml)</div>
+                            <div class="flavor-footer"><span class="flavor-price">₹150</span></div>
+                        </div>
+                    </div>
+                    <div class="flavor-card scroll-reveal">
+                        <div class="flavor-image"><img src="images/milkshakes/caramel_milkshake.png" alt="Basundhi Milkshake" onerror="this.src='images/flavors/Vannila.jpeg'"></div>
+                        <div class="flavor-info">
+                            <div class="flavor-name">BASUNDHI</div>
+                            <div class="flavor-description">Traditional basundhi milkshake (300ml)</div>
+                            <div class="flavor-footer"><span class="flavor-price">₹150</span></div>
+                        </div>
+                    </div>
+                    <div class="flavor-card scroll-reveal">
+                        <div class="flavor-image"><img src="images/milkshakes/caramel_milkshake.png" alt="Tiramisu Milkshake" onerror="this.src='images/flavors/Vannila.jpeg'"></div>
+                        <div class="flavor-info">
+                            <div class="flavor-name">TIRAMISU</div>
+                            <div class="flavor-description">Italian tiramisu milkshake (300ml)</div>
+                            <div class="flavor-footer"><span class="flavor-price">₹150</span></div>
+                        </div>
+                    </div>
+                    <div class="flavor-card scroll-reveal">
+                        <div class="flavor-image"><img src="images/milkshakes/chocolate_milkshake.png" alt="Chocolate Brownie Milkshake" onerror="this.src='images/flavors/Vannila.jpeg'"></div>
+                        <div class="flavor-info">
+                            <div class="flavor-name">CHOCOLATE BROWNIE</div>
+                            <div class="flavor-description">Chocolate brownie milkshake (300ml)</div>
+                            <div class="flavor-footer"><span class="flavor-price">₹150</span></div>
+                        </div>
+                    </div>
+                    <div class="flavor-card scroll-reveal">
+                        <div class="flavor-image"><img src="images/flavors/Red Velvet.jpeg" alt="Red Velvet Milkshake" onerror="this.src='images/flavors/Vannila.jpeg'"></div>
+                        <div class="flavor-info">
+                            <div class="flavor-name">RED VELVET</div>
+                            <div class="flavor-description">Red velvet cake milkshake (300ml)</div>
+                            <div class="flavor-footer"><span class="flavor-price">₹150</span></div>
+                        </div>
+                    </div>
+                    <div class="flavor-card scroll-reveal">
+                        <div class="flavor-image"><img src="images/milkshakes/exotic_milkshake.png" alt="Cookies and Cream Milkshake" onerror="this.src='images/flavors/Vannila.jpeg'"></div>
+                        <div class="flavor-info">
+                            <div class="flavor-name">COOKIES & CREAM</div>
+                            <div class="flavor-description">Cookies & cream milkshake (300ml)</div>
+                            <div class="flavor-footer"><span class="flavor-price">₹150</span></div>
+                        </div>
+                    </div>
+                    <div class="flavor-card scroll-reveal">
+                        <div class="flavor-image"><img src="images/milkshakes/mango_milkshake.png" alt="Rajbhog Milkshake" onerror="this.src='images/flavors/Vannila.jpeg'"></div>
+                        <div class="flavor-info">
+                            <div class="flavor-name">RAJBHOG</div>
+                            <div class="flavor-description">Royal rajbhog milkshake (300ml)</div>
+                            <div class="flavor-footer"><span class="flavor-price">₹150</span></div>
+                        </div>
+                    </div>
+                    <div class="flavor-card scroll-reveal">
+                        <div class="flavor-image"><img src="images/milkshakes/strawberry_milkshake.png" alt="Cotton Candy Milkshake" onerror="this.src='images/flavors/Vannila.jpeg'"></div>
+                        <div class="flavor-info">
+                            <div class="flavor-name">COTTON CANDY</div>
+                            <div class="flavor-description">Cotton candy milkshake (300ml)</div>
+                            <div class="flavor-footer"><span class="flavor-price">₹150</span></div>
+                        </div>
+                    </div>
+                    <div class="flavor-card scroll-reveal">
+                        <div class="flavor-image"><img src="images/milkshakes/caramel_milkshake.png" alt="Fig and Honey Milkshake" onerror="this.src='images/flavors/Vannila.jpeg'"></div>
+                        <div class="flavor-info">
+                            <div class="flavor-name">FIG & HONEY</div>
+                            <div class="flavor-description">Fig & honey milkshake (300ml)</div>
+                            <div class="flavor-footer"><span class="flavor-price">₹150</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Natural Category -->
+            <div class="flavor-category" style="margin-top: 2rem;">
+                <h3 class="category-title" style="font-size: 1.6rem; margin-bottom: 1.5rem; color: var(--dark-text);">Natural</h3>
+                <div class="flavors-grid">
+                    <div class="flavor-card scroll-reveal">
+                        <div class="flavor-image"><img src="images/milkshakes/mango_milkshake.png" alt="Jackfruit Milkshake" onerror="this.src='images/flavors/Vannila.jpeg'"></div>
+                        <div class="flavor-info">
+                            <div class="flavor-name">JACKFRUIT</div>
+                            <div class="flavor-description">Tropical jackfruit milkshake (300ml)</div>
+                            <div class="flavor-footer"><span class="flavor-price">₹150</span></div>
+                        </div>
+                    </div>
+                    <div class="flavor-card scroll-reveal">
+                        <div class="flavor-image"><img src="images/milkshakes/vanilla_milkshake.png" alt="Tender Coconut Milkshake" onerror="this.src='images/flavors/Vannila.jpeg'"></div>
+                        <div class="flavor-info">
+                            <div class="flavor-name">TENDER COCONUT</div>
+                            <div class="flavor-description">Fresh tender coconut milkshake (300ml)</div>
+                            <div class="flavor-footer"><span class="flavor-price">₹150</span></div>
+                        </div>
+                    </div>
+                    <div class="flavor-card scroll-reveal">
+                        <div class="flavor-image"><img src="images/milkshakes/vanilla_milkshake.png" alt="Meethapaan Milkshake" onerror="this.src='images/flavors/Vannila.jpeg'"></div>
+                        <div class="flavor-info">
+                            <div class="flavor-name">MEETHAPAAN</div>
+                            <div class="flavor-description">Traditional meethapaan milkshake (300ml)</div>
+                            <div class="flavor-footer"><span class="flavor-price">₹150</span></div>
+                        </div>
+                    </div>
+                    <div class="flavor-card scroll-reveal">
+                        <div class="flavor-image"><img src="images/milkshakes/pista_milkshake.png" alt="Gulkand Milkshake" onerror="this.src='images/flavors/Vannila.jpeg'"></div>
+                        <div class="flavor-info">
+                            <div class="flavor-name">GULKAND</div>
+                            <div class="flavor-description">Rose petal gulkand milkshake (300ml)</div>
+                            <div class="flavor-footer"><span class="flavor-price">₹150</span></div>
+                        </div>
+                    </div>
+                    <div class="flavor-card scroll-reveal">
+                        <div class="flavor-image"><img src="images/milkshakes/caramel_milkshake.png" alt="Arabian Dates Milkshake" onerror="this.src='images/flavors/Vannila.jpeg'"></div>
+                        <div class="flavor-info">
+                            <div class="flavor-name">ARABIAN DATES</div>
+                            <div class="flavor-description">Premium dates milkshake (300ml)</div>
+                            <div class="flavor-footer"><span class="flavor-price">₹150</span></div>
+                        </div>
+                    </div>
+                    <div class="flavor-card scroll-reveal">
+                        <div class="flavor-image"><img src="images/milkshakes/berry_milkshake.png" alt="Berry Blast Milkshake" onerror="this.src='images/flavors/Vannila.jpeg'"></div>
+                        <div class="flavor-info">
+                            <div class="flavor-name">BERRY BLAST</div>
+                            <div class="flavor-description">Mixed berry milkshake (300ml)</div>
+                            <div class="flavor-footer"><span class="flavor-price">₹150</span></div>
+                        </div>
+                    </div>
+                    <div class="flavor-card scroll-reveal">
+                        <div class="flavor-image"><img src="images/milkshakes/berry_milkshake.png" alt="Berrylicious Milkshake" onerror="this.src='images/flavors/Vannila.jpeg'"></div>
+                        <div class="flavor-info">
+                            <div class="flavor-name">BERRYLICIOUS</div>
+                            <div class="flavor-description">Berrylicious milkshake (300ml)</div>
+                            <div class="flavor-footer"><span class="flavor-price">₹150</span></div>
+                        </div>
+                    </div>
+                    <div class="flavor-card scroll-reveal">
+                        <div class="flavor-image"><img src="images/milkshakes/berry_milkshake.png" alt="Blue Berry Milkshake" onerror="this.src='images/flavors/Vannila.jpeg'"></div>
+                        <div class="flavor-info">
+                            <div class="flavor-name">BLUE BERRY</div>
+                            <div class="flavor-description">Blueberry milkshake (300ml)</div>
+                            <div class="flavor-footer"><span class="flavor-price">₹150</span></div>
+                        </div>
+                    </div>
+                    <div class="flavor-card scroll-reveal">
+                        <div class="flavor-image"><img src="images/milkshakes/strawberry_milkshake.png" alt="Pink Guava Milkshake" onerror="this.src='images/flavors/Vannila.jpeg'"></div>
+                        <div class="flavor-info">
+                            <div class="flavor-name">PINK GUAVA</div>
+                            <div class="flavor-description">Pink guava milkshake (300ml)</div>
+                            <div class="flavor-footer"><span class="flavor-price">₹150</span></div>
+                        </div>
+                    </div>
+                    <div class="flavor-card scroll-reveal">
+                        <div class="flavor-image"><img src="images/milkshakes/mango_milkshake.png" alt="Alphonso Mango Milkshake" onerror="this.src='images/flavors/Vannila.jpeg'"></div>
+                        <div class="flavor-info">
+                            <div class="flavor-name">ALPHONSO MANGO</div>
+                            <div class="flavor-description">Alphonso mango milkshake (300ml)</div>
+                            <div class="flavor-footer"><span class="flavor-price">₹150</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Exotic Category -->
+            <div class="flavor-category" style="margin-top: 2rem;">
+                <h3 class="category-title" style="font-size: 1.6rem; margin-bottom: 1.5rem; color: var(--dark-text);">Exotic</h3>
+                <div class="flavors-grid">
+                    <div class="flavor-card scroll-reveal">
+                        <div class="flavor-image"><img src="images/milkshakes/chocolate_milkshake.png" alt="Choco Almond Fudge Milkshake" onerror="this.src='images/flavors/Vannila.jpeg'"></div>
+                        <div class="flavor-info">
+                            <div class="flavor-name">CHOCO ALMOND FUDGE</div>
+                            <div class="flavor-description">Choco almond fudge milkshake (300ml)</div>
+                            <div class="flavor-footer"><span class="flavor-price">₹150</span></div>
+                        </div>
+                    </div>
+                    <div class="flavor-card scroll-reveal">
+                        <div class="flavor-image"><img src="images/milkshakes/chocolate_milkshake.png" alt="Chocolate Bourbon Milkshake" onerror="this.src='images/flavors/Vannila.jpeg'"></div>
+                        <div class="flavor-info">
+                            <div class="flavor-name">CHOCOLATE BOURBON</div>
+                            <div class="flavor-description">Chocolate bourbon milkshake (300ml)</div>
+                            <div class="flavor-footer"><span class="flavor-price">₹150</span></div>
+                        </div>
+                    </div>
+                    <div class="flavor-card scroll-reveal">
+                        <div class="flavor-image"><img src="images/milkshakes/berry_milkshake.png" alt="Red Wine Berry Milkshake" onerror="this.src='images/flavors/Vannila.jpeg'"></div>
+                        <div class="flavor-info">
+                            <div class="flavor-name">RED WINE BERRY</div>
+                            <div class="flavor-description">Red wine berry milkshake (300ml)</div>
+                            <div class="flavor-footer"><span class="flavor-price">₹150</span></div>
+                        </div>
+                    </div>
+                    <div class="flavor-card scroll-reveal">
+                        <div class="flavor-image"><img src="images/milkshakes/chocolate_milkshake.png" alt="Hazelnut Nutella Milkshake" onerror="this.src='images/flavors/Vannila.jpeg'"></div>
+                        <div class="flavor-info">
+                            <div class="flavor-name">HAZELNUT NUTELLA</div>
+                            <div class="flavor-description">Hazelnut nutella milkshake (300ml)</div>
+                            <div class="flavor-footer"><span class="flavor-price">₹150</span></div>
+                        </div>
+                    </div>
+                    <div class="flavor-card scroll-reveal">
+                        <div class="flavor-image"><img src="images/milkshakes/chocolate_milkshake.png" alt="Coffee Almond Fudge Milkshake" onerror="this.src='images/flavors/Vannila.jpeg'"></div>
+                        <div class="flavor-info">
+                            <div class="flavor-name">COFFEE ALMOND FUDGE</div>
+                            <div class="flavor-description">Coffee almond fudge milkshake (300ml)</div>
+                            <div class="flavor-footer"><span class="flavor-price">₹150</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            </div>
+        </section>
 
     <!-- About Section -->
     <section class="about" id="about">
