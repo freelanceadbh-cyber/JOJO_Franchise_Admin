@@ -333,5 +333,5 @@ def update_file(filepath, img_prefix):
     else:
         print(f"Could not find start tag in {filepath}")
 
-update_file(r'd:\Projects\JoJo Ice creams\index.html', 'images/flavors/')
-update_file(r'd:\Projects\JoJo Ice creams\Ice-cream-Shop\index.html', 'assets/images/flavors/')
+update_file(r'd:\Jojo ice cream\index.html', 'images/milkshakes/')
+update_file(r'd:\Jojo ice cream\Ice-cream-Shop\index.html', 'assets/images/milkshakes/')
