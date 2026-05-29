@@ -1,14 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Branches - JOJO Ice Creams</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link
-        href="https://fonts.googleapis.com/css2?family=Arimo:wght@400;500;600;700&family=League+Spartan:wght@400;500;600;700&family=Poppins:wght@400;500;600;700;800&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Arimo:wght@400;500;600;700&family=League+Spartan:wght@400;500;600;700&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -51,6 +48,18 @@
             justify-content: space-between;
             align-items: center;
             z-index: 1000;
+            animation: slideDown 0.6s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                transform: translateY(-100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
         }
 
         .logo-section {
@@ -60,8 +69,8 @@
         }
 
         .navbar-logo {
-            height: 150px;
-            width: auto;
+            height: auto;
+            width: 200px;
             object-fit: contain;
             background: transparent;
             filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.8)) brightness(1.1);
@@ -70,6 +79,70 @@
 
         .navbar-logo:hover {
             filter: drop-shadow(0 0 25px rgba(255, 255, 255, 1)) brightness(1.2);
+        }
+
+        .logo-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .logo-main {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+
+        .logo-cone {
+            font-size: 2.5rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .logo-text {
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+            line-height: 1;
+        }
+
+        .logo-jojo {
+            font-size: 3.5rem;
+            font-weight: 900;
+            color: white;
+            font-family: 'Arimo', sans-serif;
+            letter-spacing: 0.08em;
+        }
+
+        .logo-ceams {
+            font-size: 2rem;
+            font-weight: 900;
+            font-family: 'Arimo', sans-serif;
+            display: flex;
+            gap: 0rem;
+            letter-spacing: 0.05em;
+        }
+
+        .ce-text {
+            color: white;
+        }
+
+        .creams-text {
+            color: var(--accent-pink);
+        }
+
+        .logo-tagline {
+            font-size: 0.75rem;
+            color: #ffffff;
+            font-weight: 600;
+            font-family: 'League Spartan', sans-serif;
+            letter-spacing: 0.8px;
+            margin-top: 0.2rem;
+        }
+
+        .navigation{
+            height: 70px;
         }
 
         .nav-menu {
@@ -85,11 +158,23 @@
             font-weight: 700;
             font-size: 1.3rem;
             text-transform: uppercase;
+            position: relative;
             transition: color 0.3s ease;
         }
 
-        .nav-menu a:hover {
-            color: var(--accent-pink);
+        .nav-menu a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--accent-pink), var(--accent-purple));
+            transition: width 0.3s ease;
+        }
+
+        .nav-menu a:hover::after {
+            width: 100%;
         }
 
         .nav-right {
@@ -147,6 +232,10 @@
             width: 100%;
             max-height: calc(100vh - 70px);
             background: #ffffff;
+            border: none;
+            border-radius: 0;
+            box-shadow: none;
+            margin-top: 0;
             opacity: 0;
             visibility: hidden;
             transform: translateY(-20px);
@@ -171,6 +260,8 @@
             padding: 1.2rem 1.5rem;
             color: var(--dark-text);
             text-decoration: none;
+            border-bottom: none;
+            border: none;
             transition: all 0.3s ease;
             opacity: 0;
             transform: translateY(-10px);
@@ -185,13 +276,78 @@
             text-transform: uppercase;
         }
 
+        .hamburger-menu a::before {
+            display: none;
+        }
+
+        .hamburger-menu a:last-child {
+            border-bottom: none;
+        }
+
         .hamburger-menu.active a {
             opacity: 1;
             transform: translateY(0);
         }
 
         .hamburger-menu a:hover {
+            background: none;
+            padding-left: 1.5rem;
             color: var(--accent-pink);
+            transform: scale(1.05);
+        }
+
+        .hamburger-menu a:hover::before {
+            display: none;
+        }
+
+        .hamburger-menu.active a:nth-child(1) {
+            animation: slideInLeft 0.3s ease 0.1s forwards;
+        }
+
+        .hamburger-menu.active a:nth-child(2) {
+            animation: slideInLeft 0.3s ease 0.2s forwards;
+        }
+
+        .hamburger-menu.active a:nth-child(3) {
+            animation: slideInLeft 0.3s ease 0.3s forwards;
+        }
+
+        .hamburger-menu.active a:nth-child(4) {
+            animation: slideInLeft 0.3s ease 0.4s forwards;
+        }
+
+        .hamburger-menu.active a:nth-child(5) {
+            animation: slideInLeft 0.3s ease 0.5s forwards;
+        }
+
+        .hamburger-menu.active a:nth-child(6) {
+            animation: slideInLeft 0.3s ease 0.6s forwards;
+        }
+
+        .hamburger-menu.active a:nth-child(7) {
+            animation: slideInLeft 0.3s ease 0.7s forwards;
+        }
+
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInRight {
+            from {
+                opacity: 0;
+                transform: translateX(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
         }
 
         /* ===== BRANCH SECTION ===== */
@@ -334,28 +490,26 @@
             }
         }
 
-        /* Desktop Logo Size */
-        @media (min-width: 769px) {
-            .navbar-logo {
-                height: 90px;
-            }
+        /* Logo Size */
+        .lllooo {
+            padding-top: 15px;
+            height: 150px;
+            width: auto;
+            object-fit: contain;
         }
     </style>
 </head>
-
 <body>
     <!-- Navigation Bar -->
-    <nav>
-        <div class="logo-section">
-            <img src="assets/images/logos/Llogo.png" alt="JOJO Ice Creams Logo" class="navbar-logo">
-        </div>
+    <nav class="navigation">
+        <img src="images/logos/Llogo.png" alt="logo" class="lllooo">
         <ul class="nav-menu">
             <li><a href="index.html#home">Home</a></li>
             <li><a href="index.html#flavors">Flavour</a></li>
             <li><a href="index.html#about">About</a></li>
             <li><a href="branch.html">Branch</a></li>
             <li><a href="contact.html">Contact</a></li>
-            <li><a href="index.html#Franchise Enquiry">Franchise Enquiry</a></li>
+            <li><a href="franchise.html">Franchise Enquiry</a></li>
         </ul>
         <div class="nav-right">
             <button class="hamburger-btn" id="hamburgerBtn">
@@ -369,7 +523,7 @@
                 <a href="index.html#about">ABOUT</a>
                 <a href="branch.html">BRANCH</a>
                 <a href="contact.html">CONTACT</a>
-                <a href="index.html#Franchise Enquiry">FRANCHISE ENQUIRY</a>
+                <a href="franchise.html">FRANCHISE ENQUIRY</a>
             </div>
         </div>
     </nav>
@@ -377,26 +531,24 @@
     <!-- Branches Section -->
     <section class="branch-container">
         <h1 class="section-title">Our Branches</h1>
-        <p class="section-subtitle"><span style="color: var(--accent-pink); font-weight: 700;">Find Us</span> <span
-                style="color: var(--accent-pink); font-weight: 700;">Near You</span></p>
+        <p class="section-subtitle"><span style="color: var(--accent-pink); font-weight: 700;">Find Us</span> <span style="color: var(--accent-pink); font-weight: 700;">Near You</span></p>
 
         <div class="branches-container">
             <!-- Branch Card 1 -->
             <div class="branch-card">
                 <div class="branch-image">
-                    <img src="assets/images/general/Shop.jpg" alt="JOJO Ice Cream - Main Branch">
+                    <img src="images/general/Shop.jpg" alt="JOJO Ice Cream - Main Branch">
                 </div>
                 <div class="branch-info">
                     <h3 class="branch-name">JOJO Ice Cream - Main Branch</h3>
                     <div class="branch-detail">
-                        <span><strong>Address:</strong> 12/13, Seethapatti/Ganapathipalayam, Hotthiam/Katuputhur,
-                            Tiruchirapalli, Tamil Nadu, 621207</span>
+                        <span><strong>Address:</strong> MGM theatre premises, Opposite Akimsa, Salem road, Namakkal -637001, Tamil Nadu</span>
                     </div>
                     <div class="branch-detail">
                         <span><strong>Cell:</strong> +91 9994230734</span>
                     </div>
                     <div class="branch-detail">
-                        <span><strong>Email:</strong> jojoicecreamparlour@gmail.com</span>
+                        <span><strong>Email:</strong> jojoicecreampariour@gmail.com</span>
                     </div>
                 </div>
             </div>
@@ -408,21 +560,21 @@
         const hamburgerBtn = document.getElementById('hamburgerBtn');
         const hamburgerMenu = document.getElementById('hamburgerMenu');
 
-        hamburgerBtn.addEventListener('click', function () {
+        hamburgerBtn.addEventListener('click', function() {
             hamburgerBtn.classList.toggle('active');
             hamburgerMenu.classList.toggle('active');
         });
 
         // Close menu when a link is clicked
         document.querySelectorAll('.hamburger-menu a').forEach(link => {
-            link.addEventListener('click', function () {
+            link.addEventListener('click', function() {
                 hamburgerBtn.classList.remove('active');
                 hamburgerMenu.classList.remove('active');
             });
         });
 
         // Close menu when clicking outside
-        document.addEventListener('click', function (e) {
+        document.addEventListener('click', function(e) {
             if (!e.target.closest('.nav-right')) {
                 hamburgerBtn.classList.remove('active');
                 hamburgerMenu.classList.remove('active');
@@ -430,5 +582,4 @@
         });
     </script>
 </body>
-
 </html>
