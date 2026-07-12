@@ -1,0 +1,20 @@
+﻿JoJo Ice Creams Franchise Management PortalProject Workflow & Software Requirements Document
+Project Name: JoJo Ice Creams Franchise Management PortalCurrent Version: Static HTML promotional website.Proposed Version: Complete web application with franchise ordering, payment processing, invoice generation, dashboards, order management, and admin portal.
+1. Project Objective
+Transform the current promotional website into a complete Franchise Management System that allows franchise owners to order products, pay online, track orders, download invoices, and communicate with headquarters while providing administrators with tools to manage products, orders, payments, franchises, and analytics.
+2. User Roles
+Visitor• View public pages and product information.Franchise Owner• Login/logout• Dashboard• Browse products• Place orders• Pay online• Download invoices• Track orders• View order history• Send messages• Manage profileBrand Owner (Admin)• Manage franchise accounts• Manage products• Manage orders• Manage payments• View reports• Reply to messages• Dashboard & analytics• Manage profile
+3. Functional Modules
+Authentication- Secure login/logout- Password hashing- Forgot password- Role-based accessFranchise Dashboard- Latest order- Current balance- Total orders- Monthly purchases- Top selling products- Recent activity- AnnouncementsProduct Catalog- Images- Flavours- Categories- Prices- Search & filters- Add to cartShopping Cart- Quantity update- GST calculation- Order summaryCheckout & Payment- Billing information- Razorpay integration- Payment verification- Transaction referenceInvoice Generation- PDF invoice- Invoice number- QR code- GST details- Verification pageOrder Tracking- Order placed- Payment confirmed- Accepted- Packed- Dispatched- In transit- DeliveredOrders- Current orders- Previous orders- Invoice download- Tracking timelineMessaging- Franchise to Brand communication- Replies- Attachments (future)Notifications- Order updates- Payment updates- AnnouncementsProfile Management- Personal/store information- Password change
+4. Brand Owner Modules
+Dashboard- Today's orders- Revenue- Pending orders- ChartsFranchise Management- Activate/deactivate branches- Purchase history- Outstanding balanceProduct Management- CRUD products- Pricing- StockOrder Management- Accept/reject- Update status- Dispatch- Generate invoicePayment Management- Transaction history- Refunds- ReferencesReports- Sales- Branch-wise- Product-wise- Export PDF/Excel
+5. Database Tables
+UsersFranchisesProductsOrdersOrderItemsPaymentsInvoicesMessagesNotifications
+6. Recommended Technology Stack
+Frontend: Next.js, React, TypeScript, Tailwind CSS, Shadcn/UIBackend: Node.js with NestJS (or Express)Database: PostgreSQL + Prisma ORMAuthentication: JWT + bcryptPayment: RazorpayStorage: Cloudinary / AWS S3Email: Resend / NodemailerInvoice: PDFKit / React PDFDeployment: Vercel + Railway/Render + Neon PostgreSQL
+7. Development Workflow
+Requirement Gathering↓UI/UX Design↓Database Design↓Authentication↓Product Catalog↓Cart & Checkout↓Payment Integration↓Invoice System↓Order Tracking↓Dashboards↓Admin Panel↓Testing↓Deployment↓Maintenance
+8. Development Phases
+Phase 1: UI/UX, Database, AuthenticationPhase 2: Product Catalog, Cart, CheckoutPhase 3: Razorpay & InvoicePhase 4: Dashboard, Orders, TrackingPhase 5: Admin PortalPhase 6: Messaging & ReportsPhase 7: Testing & Deployment
+9. Future Enhancements
+Inventory ManagementDelivery ManagementSales AnalyticsWhatsApp/SMS NotificationsMobile ApplicationAI-based Sales ForecastingLow Stock AlertsLoyalty ProgramsMulti-language SupportAccounting Software Integration

@@ -1,0 +1,153 @@
+@import "tailwindcss";
+
+@variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-background: var(--jojo-bg);
+  --color-foreground: var(--jojo-fg);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+
+  --radius-lg: var(--radius);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: calc(var(--radius) - 4px);
+
+  /* Jojo Brand Identity Colors */
+  --color-brand-pink: #ffe6e6;
+  --color-brand-crimson: #DC143C;
+  --color-brand-maroon: #8B0000;
+  --color-brand-cream: #FFFDF9;
+
+  /* Custom Transitions & Animations */
+  --animate-float: float 4s ease-in-out infinite;
+  --animate-slide-up: slide-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  --animate-fade-in-down: fade-in-down 0.4s ease-out forwards;
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+  }
+  @keyframes slide-up {
+    from { transform: translateY(16px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+  @keyframes fade-in-down {
+    from { transform: translateY(-12px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+}
+
+/* Custom Base Elements & Classes */
+@layer base {
+  * {
+    border-color: var(--border);
+    outline-color: var(--ring);
+  }
+  body {
+    background-color: var(--jojo-bg);
+    color: var(--jojo-fg);
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+}
+
+:root {
+  --jojo-bg: #FFFDF9; /* Warm, rich cream base */
+  --jojo-fg: #1E1215; /* Dark chocolate text */
+
+  --card: #FFFFFF;
+  --card-foreground: #1E1215;
+
+  --popover: #FFFFFF;
+  --popover-foreground: #1E1215;
+
+  --primary: #DC143C; /* Crimson */
+  --primary-foreground: #FFFFFF;
+
+  --secondary: #FFF0F2; /* Light soft pink */
+  --secondary-foreground: #8B0000; /* Deep crimson-maroon */
+
+  --muted: #F5EFEB;
+  --muted-foreground: #6B5E62;
+
+  --accent: #FFE4E8; /* Soft pink-rose hover */
+  --accent-foreground: #DC143C;
+
+  --destructive: #E11D48;
+  --destructive-foreground: #FFFFFF;
+
+  --border: #F1E5E7;
+  --input: #F1E5E7;
+  --ring: #DC143C;
+
+  --radius: 1rem;
+}
+
+.dark {
+  --jojo-bg: #0E0709; /* Sleek, dark maroon/chocolate black */
+  --jojo-fg: #FFF0F2;
+
+  --card: #180D11;
+  --card-foreground: #FFF0F2;
+
+  --popover: #180D11;
+  --popover-foreground: #FFF0F2;
+
+  --primary: #FF3B5F; /* Vibrant, self-illuminating pink-red */
+  --primary-foreground: #0E0709;
+
+  --secondary: #2C1318;
+  --secondary-foreground: #FFA3B3;
+
+  --muted: #26171B;
+  --muted-foreground: #A18D92;
+
+  --accent: #331A21;
+  --accent-foreground: #FF3B5F;
+
+  --destructive: #FF4D4D;
+  --destructive-foreground: #FFFFFF;
+
+  --border: #2D1B20;
+  --input: #2D1B20;
+  --ring: #FF3B5F;
+}
+
+/* Glassmorphism components */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(220, 20, 60, 0.08);
+}
+
+.dark .glass-panel {
+  background: rgba(24, 13, 17, 0.75);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 59, 95, 0.08);
+}
+
+.glass-nav {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(220, 20, 60, 0.06);
+}
+
+.dark .glass-nav {
+  background: rgba(14, 7, 9, 0.85);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(255, 59, 95, 0.06);
+}

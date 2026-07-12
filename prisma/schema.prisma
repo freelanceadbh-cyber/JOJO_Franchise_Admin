@@ -1,0 +1,128 @@
+// Prisma schema file for JoJo Ice Creams B2B Franchise Portal (SQLite dev configuration)
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+// Note: SQLite does not support Enums natively, Prisma emulates them as text columns with validation checks
+model User {
+  id                String       @id @default(uuid())
+  email             String       @unique
+  passwordHash      String
+  name              String
+  role              String       @default("FRANCHISE_OWNER") // "ADMIN" or "FRANCHISE_OWNER"
+  status            String       @default("ACTIVE")          // "ACTIVE" or "INACTIVE"
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+
+  franchise         Franchise?
+  sentMessages      Message[]    @relation("Sender")
+  receivedMessages  Message[]    @relation("Recipient")
+  notifications     Notification[]
+}
+
+model Franchise {
+  id                 String     @id @default(uuid())
+  userId             String     @unique
+  user               User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  storeName          String
+  gstNumber          String
+  address            String
+  contactNumber      String
+  creditLimit        Decimal    @default(0)
+  outstandingBalance Decimal    @default(0)
+  
+  orders             Order[]
+}
+
+model Product {
+  id          String      @id @default(uuid())
+  name        String
+  category    String      // e.g. "Ice Cream", "Milkshake", "Exotic Cup"
+  flavor      String
+  description String?
+  price       Decimal
+  imageUrl    String?
+  stock       Int         @default(0)
+  isAvailable Boolean     @default(true)
+  
+  orderItems  OrderItem[]
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+}
+
+model Order {
+  id            String        @id @default(uuid())
+  franchiseId   String
+  franchise     Franchise     @relation(fields: [franchiseId], references: [id], onDelete: Cascade)
+  status        String        @default("PENDING") // "PENDING", "CONFIRMED", etc.
+  totalAmount   Decimal
+  gstAmount     Decimal       // 18% GST standard
+  finalAmount   Decimal
+  paymentStatus String        @default("PENDING") // "PENDING", "PAID", "FAILED"
+  
+  orderItems    OrderItem[]
+  payments      Payment[]
+  invoice       Invoice?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+}
+
+model OrderItem {
+  id              String   @id @default(uuid())
+  orderId         String
+  order           Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId       String
+  product         Product  @relation(fields: [productId], references: [id])
+  quantity        Int
+  priceAtPurchase Decimal
+}
+
+model Payment {
+  id             String        @id @default(uuid())
+  orderId        String
+  order          Order         @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  amount         Decimal
+  provider       String        @default("RAZORPAY")
+  status         String        // "PENDING", "PAID", etc.
+  paymentId      String?       // Razorpay Payment ID
+  razorpayOrderId String?       // Razorpay Order ID
+  signature      String?
+  createdAt      DateTime      @default(now())
+}
+
+model Invoice {
+  id            String   @id @default(uuid())
+  orderId       String   @unique
+  order         Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  invoiceNumber String   @unique // e.g. INV-2026-0001
+  pdfUrl        String?
+  gstDetails    String?
+  createdAt     DateTime @default(now())
+}
+
+model Message {
+  id          String   @id @default(uuid())
+  senderId    String
+  sender      User     @relation("Sender", fields: [senderId], references: [id], onDelete: Cascade)
+  recipientId String
+  recipient   User     @relation("Recipient", fields: [recipientId], references: [id], onDelete: Cascade)
+  subject     String
+  body        String
+  isRead      Boolean  @default(false)
+  createdAt   DateTime @default(now())
+}
+
+model Notification {
+  id        String           @id @default(uuid())
+  userId    String
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      String           // "ORDER", "PAYMENT", "SYSTEM"
+  message   String
+  isRead    Boolean          @default(false)
+  createdAt DateTime         @default(now())
+}
