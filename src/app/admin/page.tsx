@@ -1,29 +1,26 @@
-import React from 'react';
-import { auth, signOut } from '@/auth';
-import { redirect } from 'next/navigation';
-import { prisma } from '@/lib/prisma';
-import { revalidatePath } from 'next/cache';
-import { 
-  IceCream, 
-  Users, 
-  ShoppingBag, 
-  DollarSign, 
-  LogOut, 
-  Layers, 
-  FileText,
-  UserCheck,
-  TrendingUp,
-  Clock,
-  ArrowUpRight,
-  ChevronRight,
-  Percent,
-  CheckCircle,
-  Truck,
-  Package,
-  MessageSquare
-} from 'lucide-react';
 import Link from 'next/link';
+import { revalidatePath } from 'next/cache';
+import { redirect } from 'next/navigation';
+
+import { auth, signOut } from '@/auth';
+import { prisma } from '@/lib/prisma';
 import ThemeToggle from '@/components/theme-toggle';
+import {
+  CheckCircle,
+  Clock,
+  DollarSign,
+  IceCream,
+  Layers,
+  LogOut,
+  MessageSquare,
+  Package,
+  Percent,
+  ShoppingBag,
+  TrendingUp,
+  Truck,
+  UserCheck,
+  Users,
+} from 'lucide-react';
 
 // Server Action to update order status dynamically
 async function updateStatus(orderId: string, newStatus: string) {

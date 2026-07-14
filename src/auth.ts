@@ -6,6 +6,7 @@ import bcrypt from 'bcryptjs';
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   ...authConfig,
+  secret: process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET || 'jojo-franchise-admin-dev-secret',
   providers: [
     Credentials({
       async authorize(credentials) {
