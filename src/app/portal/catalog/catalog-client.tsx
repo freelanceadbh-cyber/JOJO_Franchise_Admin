@@ -31,6 +31,7 @@ interface ProductData {
   id: string;
   name: string;
   category: string;
+  subcategory: string;
   flavor: string;
   description: string | null;
   price: number;
@@ -43,24 +44,29 @@ interface CatalogClientProps {
   initialProducts: ProductData[];
   userName: string;
   storeName: string;
+  dbError?: string | null;
 }
 
-export default function CatalogClient({ initialProducts, userName, storeName }: CatalogClientProps) {
+const SUBCATEGORY_ORDER = [
+  'Regular',
+  'Classic',
+  'Special',
+  'Natural',
+  'Exotic',
+  'Exotic Special',
+  'Sugar Free',
+];
+
+export default function CatalogClient({ initialProducts, userName, storeName, dbError }: CatalogClientProps) {
   const router = useRouter();
   const { showToast } = useToastTheme();
   
-  // Search and Filter States
   const [searchQuery, setSearchQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState('ALL');
-  
-  // Product Detail Modal State
   const [selectedProduct, setSelectedProduct] = useState<ProductData | null>(null);
-  
-  // Cart States
   const [cart, setCart] = useState<CartItem[]>([]);
   const [cartOpen, setCartOpen] = useState(false);
   
-  // Initialize cart from localStorage on mount
   useEffect(() => {
     const savedCart = localStorage.getItem('jojo_cart_items');
     if (savedCart) {
@@ -72,13 +78,11 @@ export default function CatalogClient({ initialProducts, userName, storeName }: 
     }
   }, []);
 
-  // Sync cart to localStorage whenever it changes
   const saveCartToStorage = (updatedCart: CartItem[]) => {
     setCart(updatedCart);
     localStorage.setItem('jojo_cart_items', JSON.stringify(updatedCart));
   };
 
-  // Add to Cart handler
   const addToCart = (product: ProductData) => {
     const existingItem = cart.find(item => item.productId === product.id);
     if (existingItem) {
@@ -108,13 +112,11 @@ export default function CatalogClient({ initialProducts, userName, storeName }: 
     }
   };
 
-  // Decrement Cart Item quantity
   const decrementQuantity = (productId: string) => {
     const existingItem = cart.find(item => item.productId === productId);
     if (!existingItem) return;
 
     if (existingItem.quantity <= 1) {
-      // Remove from cart
       const updatedCart = cart.filter(item => item.productId !== productId);
       saveCartToStorage(updatedCart);
       showToast(`Removed item from cart`, 'info');
@@ -129,14 +131,12 @@ export default function CatalogClient({ initialProducts, userName, storeName }: 
     }
   };
 
-  // Remove completely from Cart
   const removeFromCart = (productId: string) => {
     const updatedCart = cart.filter(item => item.productId !== productId);
     saveCartToStorage(updatedCart);
     showToast(`Removed item from cart`, 'info');
   };
 
-  // Filter products based on search query and category
   const filteredProducts = initialProducts.filter(p => {
     const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
                           p.flavor.toLowerCase().includes(searchQuery.toLowerCase());
@@ -144,25 +144,29 @@ export default function CatalogClient({ initialProducts, userName, storeName }: 
     return matchesSearch && matchesCategory;
   });
 
-  // Calculate pricing summaries
   const cartSubtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-  const cartGST = cartSubtotal * 0.18; // 18% GST standard
+  const cartGST = cartSubtotal * 0.18;
   const cartTotal = cartSubtotal + cartGST;
   const cartItemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
 
-  // Navigate to Checkout
   const handleProceedToCheckout = () => {
     if (cart.length === 0) return;
     router.push('/portal/checkout');
   };
 
-  // Categories list for filtering tabs
   const categories = [
     { value: 'ALL', label: 'All Scoops' },
     { value: 'ICE_CREAM', label: 'Tubs & Scoops' },
-    { value: 'MILKSHAKE', label: 'Milkshakes' },
-    { value: 'EXOTIC_CUP', label: 'Exotic Sundaes' }
+    { value: 'EXOTIC_CUP', label: 'Exotic Sundaes' },
   ];
+
+  const groupedProducts = SUBCATEGORY_ORDER.reduce((acc, subcat) => {
+    const items = filteredProducts.filter(p => p.subcategory === subcat);
+    if (items.length > 0) {
+      acc.push({ subcategory: subcat, products: items });
+    }
+    return acc;
+  }, [] as { subcategory: string; products: ProductData[] }[]);
 
   return (
     <div className="min-h-screen flex bg-[#FFFDF9] dark:bg-[#0E0709] font-sans relative overflow-x-hidden">
@@ -209,7 +213,6 @@ export default function CatalogClient({ initialProducts, userName, storeName }: 
           </div>
           <button 
             onClick={() => {
-              // Standard route triggers client logout
               const form = document.createElement('form');
               form.method = 'POST';
               form.action = '/api/auth/signout';
@@ -251,9 +254,14 @@ export default function CatalogClient({ initialProducts, userName, storeName }: 
           </div>
         </header>
 
-        {/* Catalog Dashboard Grid */}
         <div className="p-6 space-y-6 max-w-7xl w-full mx-auto">
           
+          {dbError && (
+            <div className="p-4 rounded-2xl bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900 text-xs text-red-700 dark:text-red-400">
+              <strong>Database Error:</strong> {dbError}
+            </div>
+          )}
+
           {/* Search Bar and Categories Tabs */}
           <div className="flex flex-col md:flex-row gap-4 items-center justify-between p-4 rounded-3xl bg-card border border-border shadow-xs">
             <div className="relative w-full md:max-w-md">
@@ -267,7 +275,6 @@ export default function CatalogClient({ initialProducts, userName, storeName }: 
               />
             </div>
 
-            {/* Filter Tabs */}
             <div className="flex flex-wrap gap-1.5 w-full md:w-auto">
               {categories.map((c) => (
                 <button
@@ -285,8 +292,8 @@ export default function CatalogClient({ initialProducts, userName, storeName }: 
             </div>
           </div>
 
-          {/* Catalog Grid */}
-          {filteredProducts.length === 0 ? (
+          {/* Category-wise Product Sections */}
+          {groupedProducts.length === 0 ? (
             <div className="py-20 text-center space-y-3 border border-dashed border-border/80 rounded-3xl bg-muted/5">
               <ShoppingBag size={48} className="text-muted-foreground mx-auto opacity-35 animate-float" />
               <h3 className="text-md font-bold text-foreground">No products found</h3>
@@ -295,90 +302,105 @@ export default function CatalogClient({ initialProducts, userName, storeName }: 
               </p>
             </div>
           ) : (
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredProducts.map((p) => {
-                const inCart = cart.find(item => item.productId === p.id);
-                return (
-                  <div 
-                    key={p.id} 
-                    className="group rounded-3xl border border-border p-5 bg-card hover:shadow-lg hover:border-brand-crimson/15 transition-all flex flex-col justify-between"
-                  >
-                    <div>
-                      {/* Product visual container */}
-                      <div className="w-full h-40 rounded-2xl bg-brand-pink/50 flex items-center justify-center text-brand-crimson mb-4 relative overflow-hidden group-hover:scale-[1.01] transition-all">
-                        <IceCream size={48} className="stroke-[1.5]" />
-                        <span className="absolute top-3 left-3 px-2.5 py-0.5 bg-white/95 dark:bg-card/95 text-brand-crimson font-bold rounded-lg text-[9px] uppercase tracking-wider shadow-xs">
-                          {p.category.replace('_', ' ')}
-                        </span>
-                        
-                        {/* Stock alert badges */}
-                        {p.stock <= 0 ? (
-                          <span className="absolute bottom-3 right-3 px-2 py-0.5 bg-red-600 text-white font-bold rounded text-[8px] uppercase tracking-wide">
-                            Out of Stock
-                          </span>
-                        ) : p.stock < 10 ? (
-                          <span className="absolute bottom-3 right-3 px-2 py-0.5 bg-yellow-500 text-white font-bold rounded text-[8px] uppercase tracking-wide">
-                            Low Stock ({p.stock})
-                          </span>
-                        ) : null}
-                      </div>
-
-                      <div className="flex justify-between items-start gap-2">
-                        <h3 className="text-sm font-bold text-foreground line-clamp-1">{p.name}</h3>
-                        <button 
-                          onClick={() => setSelectedProduct(p)}
-                          className="p-1 hover:bg-muted rounded-md text-muted-foreground hover:text-brand-crimson transition-all cursor-pointer border-0 bg-transparent"
-                        >
-                          <Eye size={16} />
-                        </button>
-                      </div>
-                      <span className="text-[10px] text-muted-foreground font-semibold block mt-0.5">Flavor: {p.flavor}</span>
-                      <p className="text-xs text-muted-foreground leading-relaxed mt-2 line-clamp-2">{p.description}</p>
-                    </div>
-
-                    <div className="flex items-center justify-between border-t border-border/40 pt-4 mt-5">
-                      <span className="text-md font-extrabold text-brand-crimson">
-                        ₹{p.price.toFixed(2)}
-                      </span>
-
-                      {p.stock <= 0 ? (
-                        <button 
-                          disabled 
-                          className="px-3.5 py-2 bg-muted text-muted-foreground font-bold rounded-xl text-xs cursor-not-allowed border-0"
-                        >
-                          Unavailable
-                        </button>
-                      ) : inCart ? (
-                        <div className="flex items-center border border-brand-crimson/30 rounded-xl bg-secondary overflow-hidden">
-                          <button 
-                            onClick={() => decrementQuantity(p.id)}
-                            className="px-2 py-2 hover:bg-brand-crimson/10 text-brand-crimson cursor-pointer border-0 bg-transparent flex items-center justify-center"
-                          >
-                            <Minus size={12} className="stroke-[2.5]" />
-                          </button>
-                          <span className="px-2 text-xs font-black text-secondary-foreground min-w-[20px] text-center">
-                            {inCart.quantity}
-                          </span>
-                          <button 
-                            onClick={() => addToCart(p)}
-                            className="px-2 py-2 hover:bg-brand-crimson/10 text-brand-crimson cursor-pointer border-0 bg-transparent flex items-center justify-center"
-                          >
-                            <Plus size={12} className="stroke-[2.5]" />
-                          </button>
-                        </div>
-                      ) : (
-                        <button 
-                          onClick={() => addToCart(p)}
-                          className="px-4 py-2 bg-brand-crimson hover:bg-brand-crimson/95 text-white font-bold rounded-xl text-xs flex items-center gap-1.5 transition-colors cursor-pointer border-0 shadow-sm shadow-brand-crimson/10"
-                        >
-                          <Plus size={12} className="stroke-[2.5]" />
-                          Add Stock
-                        </button>
-                      )}
-                    </div>
+            <div className="space-y-10">
+              {groupedProducts.map((group) => (
+                <div key={group.subcategory} className="space-y-4">
+                  <div className="flex items-center gap-3">
+                    <h2 className="text-lg font-black text-foreground tracking-tight">{group.subcategory}</h2>
+                    <span className="h-px flex-1 bg-border/60" />
+                    <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
+                      {group.products.length} {group.products.length === 1 ? 'item' : 'items'}
+                    </span>
                   </div>
-                );
-              })}
+                  <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {group.products.map((p) => {
+                      const inCart = cart.find(item => item.productId === p.id);
+                      return (
+                        <div 
+                          key={p.id} 
+                          className="group rounded-3xl border border-border p-5 bg-card hover:shadow-lg hover:border-brand-crimson/15 transition-all flex flex-col justify-between"
+                        >
+                          <div>
+                            <div className="w-full h-40 rounded-2xl bg-brand-pink/50 flex items-center justify-center text-brand-crimson mb-4 relative overflow-hidden group-hover:scale-[1.01] transition-all">
+                              {p.imageUrl ? (
+                                <img src={p.imageUrl} alt={p.name} className="w-full h-full object-cover rounded-2xl" />
+                              ) : (
+                                <IceCream size={48} className="stroke-[1.5]" />
+                              )}
+                              <span className="absolute top-3 left-3 px-2.5 py-0.5 bg-white/95 dark:bg-card/95 text-brand-crimson font-bold rounded-lg text-[9px] uppercase tracking-wider shadow-xs">
+                                {p.subcategory}
+                              </span>
+                              
+                              {p.stock <= 0 ? (
+                                <span className="absolute bottom-3 right-3 px-2 py-0.5 bg-red-600 text-white font-bold rounded text-[8px] uppercase tracking-wide">
+                                  Out of Stock
+                                </span>
+                              ) : p.stock < 10 ? (
+                                <span className="absolute bottom-3 right-3 px-2 py-0.5 bg-yellow-500 text-white font-bold rounded text-[8px] uppercase tracking-wide">
+                                  Low Stock ({p.stock})
+                                </span>
+                              ) : null}
+                            </div>
+
+                            <div className="flex justify-between items-start gap-2">
+                              <h3 className="text-sm font-bold text-foreground line-clamp-1">{p.name}</h3>
+                              <button 
+                                onClick={() => setSelectedProduct(p)}
+                                className="p-1 hover:bg-muted rounded-md text-muted-foreground hover:text-brand-crimson transition-all cursor-pointer border-0 bg-transparent"
+                              >
+                                <Eye size={16} />
+                              </button>
+                            </div>
+                            <span className="text-[10px] text-muted-foreground font-semibold block mt-0.5">Flavor: {p.flavor}</span>
+                            <p className="text-xs text-muted-foreground leading-relaxed mt-2 line-clamp-2">{p.description}</p>
+                          </div>
+
+                          <div className="flex items-center justify-between border-t border-border/40 pt-4 mt-5">
+                            <span className="text-md font-extrabold text-brand-crimson">
+                              ₹{p.price.toFixed(2)}
+                            </span>
+
+                            {p.stock <= 0 ? (
+                              <button 
+                                disabled 
+                                className="px-3.5 py-2 bg-muted text-muted-foreground font-bold rounded-xl text-xs cursor-not-allowed border-0"
+                              >
+                                Unavailable
+                              </button>
+                            ) : inCart ? (
+                              <div className="flex items-center border border-brand-crimson/30 rounded-xl bg-secondary overflow-hidden">
+                                <button 
+                                  onClick={() => decrementQuantity(p.id)}
+                                  className="px-2 py-2 hover:bg-brand-crimson/10 text-brand-crimson cursor-pointer border-0 bg-transparent flex items-center justify-center"
+                                >
+                                  <Minus size={12} className="stroke-[2.5]" />
+                                </button>
+                                <span className="px-2 text-xs font-black text-secondary-foreground min-w-[20px] text-center">
+                                  {inCart.quantity}
+                                </span>
+                                <button 
+                                  onClick={() => addToCart(p)}
+                                  className="px-2 py-2 hover:bg-brand-crimson/10 text-brand-crimson cursor-pointer border-0 bg-transparent flex items-center justify-center"
+                                >
+                                  <Plus size={12} className="stroke-[2.5]" />
+                                </button>
+                              </div>
+                            ) : (
+                              <button 
+                                onClick={() => addToCart(p)}
+                                className="px-4 py-2 bg-brand-crimson hover:bg-brand-crimson/95 text-white font-bold rounded-xl text-xs flex items-center gap-1.5 transition-colors cursor-pointer border-0 shadow-sm shadow-brand-crimson/10"
+                              >
+                                <Plus size={12} className="stroke-[2.5]" />
+                                Add Stock
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
             </div>
           )}
         </div>
@@ -401,7 +423,7 @@ export default function CatalogClient({ initialProducts, userName, storeName }: 
               </div>
               <div>
                 <span className="text-[10px] bg-brand-pink text-brand-crimson font-black px-2 py-0.5 rounded-lg uppercase tracking-wider">
-                  {selectedProduct.category.replace('_', ' ')}
+                  {selectedProduct.subcategory}
                 </span>
                 <h2 className="text-xl font-bold text-foreground mt-1.5">{selectedProduct.name}</h2>
                 <p className="text-xs text-muted-foreground mt-0.5 font-semibold">Flavor notes: {selectedProduct.flavor}</p>
@@ -473,7 +495,6 @@ export default function CatalogClient({ initialProducts, userName, storeName }: 
           </button>
         </header>
 
-        {/* Drawer contents */}
         {cart.length === 0 ? (
           <div className="flex-1 flex flex-col items-center justify-center p-6 space-y-3">
             <ShoppingCart size={48} className="text-muted-foreground opacity-30 animate-float" />
@@ -527,7 +548,6 @@ export default function CatalogClient({ initialProducts, userName, storeName }: 
               ))}
             </div>
 
-            {/* Calculations & CTA footer */}
             <div className="p-6 border-t border-border bg-muted/20 space-y-4 flex-shrink-0">
               <div className="space-y-2.5 text-xs">
                 <div className="flex justify-between text-muted-foreground">

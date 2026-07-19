@@ -4,7 +4,6 @@ import bcrypt from 'bcryptjs';
 async function main() {
   console.log('Starting seeding database...');
 
-  // 1. Clear existing data to ensure idempotent seeds
   await prisma.notification.deleteMany();
   await prisma.message.deleteMany();
   await prisma.invoice.deleteMany();
@@ -17,14 +16,10 @@ async function main() {
 
   console.log('Cleared existing records.');
 
-  // 2. Create Users & Franchise
   const salt = await bcrypt.genSalt(10);
-  
-  // Hashed Passwords
   const adminPasswordHash = await bcrypt.hash('AdminPassword123', salt);
   const franchisePasswordHash = await bcrypt.hash('FranchisePassword123', salt);
 
-  // Admin User (HQ Brand Owner)
   const admin = await prisma.user.create({
     data: {
       email: 'admin@jojo.com',
@@ -36,7 +31,6 @@ async function main() {
   });
   console.log(`Created Admin User: ${admin.email}`);
 
-  // Franchise User (Franchise Owner)
   const franchiseUser = await prisma.user.create({
     data: {
       email: 'franchise1@jojo.com',
@@ -48,7 +42,6 @@ async function main() {
   });
   console.log(`Created Franchise Owner User: ${franchiseUser.email}`);
 
-  // Create Franchise Profile (with outstanding balance and credit limit)
   const franchise = await prisma.franchise.create({
     data: {
       userId: franchiseUser.id,
@@ -62,105 +55,61 @@ async function main() {
   });
   console.log(`Created Franchise Profile: ${franchise.storeName}`);
 
-  // 3. Create Products (Flavours and Milkshakes from menu)
   const productsData = [
-    // --- Ice Cream Scoops & Tubs ---
-    {
-      name: 'Belgian Dark Chocolate Tub',
-      category: 'ICE_CREAM',
-      flavor: 'Dark Chocolate',
-      description: 'Rich, velvet smooth Belgian dark chocolate ice cream crafted with real cocoa butter.',
-      price: 250.00,
-      stock: 120,
-      isAvailable: true,
-    },
-    {
-      name: 'Alphonso Mango Delight Tub',
-      category: 'ICE_CREAM',
-      flavor: 'Alphonso Mango',
-      description: 'Creamy ice cream made with real Alphonso mango pulp sourced from Ratnagiri.',
-      price: 220.00,
-      stock: 80,
-      isAvailable: true,
-    },
-    {
-      name: 'Madagascar Vanilla Gold Tub',
-      category: 'ICE_CREAM',
-      flavor: 'Madagascar Vanilla',
-      description: 'Classic rich vanilla ice cream flavored with premium Madagascar vanilla beans.',
-      price: 180.00,
-      stock: 150,
-      isAvailable: true,
-    },
-    {
-      name: 'Strawberry Rose Petals Tub',
-      category: 'ICE_CREAM',
-      flavor: 'Strawberry Rose',
-      description: 'Sensational combination of fresh organic strawberries and aromatic rose petal confit.',
-      price: 210.00,
-      stock: 60,
-      isAvailable: true,
-    },
+    { name: 'Vanilla', category: 'ICE_CREAM', subcategory: 'Regular', flavor: 'Vanilla', description: 'Classic vanilla (60g)', price: 49.00, stock: 200, isAvailable: true, imageUrl: '/images/flavors/Vannila.jpeg' },
+    { name: 'Strawberry', category: 'ICE_CREAM', subcategory: 'Regular', flavor: 'Strawberry', description: 'Fresh strawberry flavor (60g)', price: 49.00, stock: 180, isAvailable: true, imageUrl: '/images/flavors/Strawberry.jpeg' },
+    { name: 'Vanilla Choco Chips', category: 'ICE_CREAM', subcategory: 'Regular', flavor: 'Vanilla Choco Chip', description: 'Vanilla with chocolate (60g)', price: 49.00, stock: 180, isAvailable: true, imageUrl: '/images/flavors/Vannila chocoship.jpeg' },
 
-    // --- Milkshakes ---
-    {
-      name: 'Double Chocolate Fudge Shake',
-      category: 'MILKSHAKE',
-      flavor: 'Chocolate',
-      description: 'Decadent chocolate milkshake loaded with chocolate chips and hot fudge drizzle.',
-      price: 150.00,
-      stock: 100,
-      isAvailable: true,
-    },
-    {
-      name: 'Mango Mania Shake',
-      category: 'MILKSHAKE',
-      flavor: 'Mango',
-      description: 'Thick mango milkshake blended with whipped cream and mango chunks.',
-      price: 140.00,
-      stock: 90,
-      isAvailable: true,
-    },
-    {
-      name: 'Creamy Oreo Crunch Shake',
-      category: 'MILKSHAKE',
-      flavor: 'Oreo & Cream',
-      description: 'Creamy vanilla milkshake blended with crunchy Oreo cookie pieces.',
-      price: 130.00,
-      stock: 110,
-      isAvailable: true,
-    },
+    { name: 'Butterscotch', category: 'ICE_CREAM', subcategory: 'Classic', flavor: 'Butterscotch', description: 'Rich butterscotch flavor (90g)', price: 99.00, stock: 150, isAvailable: true, imageUrl: '/images/flavors/buttercotch.jpeg' },
+    { name: 'Black Currant', category: 'ICE_CREAM', subcategory: 'Classic', flavor: 'Black Currant', description: 'Tangy black currant flavor (90g)', price: 99.00, stock: 150, isAvailable: true, imageUrl: '/images/flavors/Blackcurrent.jpeg' },
+    { name: 'Kulfi Malai', category: 'ICE_CREAM', subcategory: 'Classic', flavor: 'Kulfi Malai', description: 'Traditional kulfi taste (90g)', price: 99.00, stock: 150, isAvailable: true, imageUrl: '/images/flavors/kulfi malai.jpeg' },
+    { name: 'Pista', category: 'ICE_CREAM', subcategory: 'Classic', flavor: 'Pista', description: 'Pistachio delight (90g)', price: 99.00, stock: 150, isAvailable: true, imageUrl: '/images/flavors/Pista.jpeg' },
+    { name: 'Chocolate', category: 'ICE_CREAM', subcategory: 'Classic', flavor: 'Chocolate', description: 'Rich chocolate flavor (90g)', price: 99.00, stock: 150, isAvailable: true, imageUrl: '/images/flavors/Chocolate.jpeg' },
 
-    // --- Exotic Cups & Sundaes ---
-    {
-      name: 'Exotic Mango Lotus Biscoff Sundae',
-      category: 'EXOTIC_CUP',
-      flavor: 'Mango & Biscoff',
-      description: 'Signature sundae layered with mango pulp, Lotus Biscoff spread, and biscoff cookie crumbs.',
-      price: 320.00,
-      stock: 45,
-      isAvailable: true,
-    },
-    {
-      name: 'Exotic Hazelnut Rocher Fudge',
-      category: 'EXOTIC_CUP',
-      flavor: 'Hazelnut Chocolate',
-      description: 'Gourmet sundae combining hazelnut spread, crushed Ferrero Rocher, and hot fudge.',
-      price: 350.00,
-      stock: 50,
-      isAvailable: true,
-    },
+    { name: 'Black Forest', category: 'ICE_CREAM', subcategory: 'Special', flavor: 'Black Forest', description: 'Cherry and chocolate cake (90g)', price: 89.00, stock: 120, isAvailable: true, imageUrl: '/images/flavors/Black Forest.jpeg' },
+    { name: 'Oreo Freak', category: 'ICE_CREAM', subcategory: 'Special', flavor: 'Oreo', description: 'Loaded with Oreo cookies (90g)', price: 89.00, stock: 120, isAvailable: true, imageUrl: '/images/flavors/oreo Freak.jpeg' },
+    { name: 'Salted Caramel', category: 'ICE_CREAM', subcategory: 'Special', flavor: 'Salted Caramel', description: 'Sweet caramel with sea salt (90g)', price: 89.00, stock: 120, isAvailable: true, imageUrl: '/images/flavors/Salted Caramel.jpeg' },
+    { name: 'Basundhi', category: 'ICE_CREAM', subcategory: 'Special', flavor: 'Basundi', description: 'Traditional basundi flavor (90g)', price: 89.00, stock: 120, isAvailable: true, imageUrl: '/images/flavors/basunthi.jpeg' },
+    { name: 'Chocolate Brownie', category: 'ICE_CREAM', subcategory: 'Special', flavor: 'Chocolate Brownie', description: 'Rich chocolate with brownie bits (90g)', price: 89.00, stock: 120, isAvailable: true, imageUrl: '/images/flavors/Chocolate.jpeg' },
+    { name: 'Red Velvet', category: 'ICE_CREAM', subcategory: 'Special', flavor: 'Red Velvet', description: 'Elegant red velvet cake flavor (90g)', price: 89.00, stock: 120, isAvailable: true, imageUrl: '/images/flavors/Red Velvet.jpeg' },
+    { name: 'Cookies and Cream', category: 'ICE_CREAM', subcategory: 'Special', flavor: 'Cookies and Cream', description: 'Vanilla with cookie crumbles (90g)', price: 89.00, stock: 120, isAvailable: true, imageUrl: '/images/flavors/cookies and cream.jpeg' },
+    { name: 'Rajbhog', category: 'ICE_CREAM', subcategory: 'Special', flavor: 'Rajbhog', description: 'Royal rajbhog sweets flavor (90g)', price: 89.00, stock: 120, isAvailable: true, imageUrl: '/images/flavors/Rajbhog.jpeg' },
+    { name: 'Cotton Candy', category: 'ICE_CREAM', subcategory: 'Special', flavor: 'Cotton Candy', description: 'Sweet cotton candy delight (90g)', price: 89.00, stock: 120, isAvailable: true, imageUrl: '/images/flavors/cotton candy.jpeg' },
+    { name: 'Fig and Honey', category: 'ICE_CREAM', subcategory: 'Special', flavor: 'Fig and Honey', description: 'Natural fig with golden honey (90g)', price: 89.00, stock: 120, isAvailable: true, imageUrl: '/images/flavors/fig and honey.jpeg' },
+    { name: 'Chocolate Choco Chips', category: 'ICE_CREAM', subcategory: 'Special', flavor: 'Chocolate Choco Chips', description: 'Rich chocolate with chocolate chips (90g)', price: 89.00, stock: 120, isAvailable: true, imageUrl: '/images/flavors/Chocolate.jpeg' },
+
+    { name: 'Jackfruit', category: 'ICE_CREAM', subcategory: 'Natural', flavor: 'Jackfruit', description: 'Sweet tropical jackfruit flavor (90g)', price: 89.00, stock: 120, isAvailable: true, imageUrl: '/images/flavors/Jackfruit.jpeg' },
+    { name: 'Tender Coconut', category: 'ICE_CREAM', subcategory: 'Natural', flavor: 'Tender Coconut', description: 'Fresh tender coconut water flavor (90g)', price: 89.00, stock: 120, isAvailable: true, imageUrl: '/images/flavors/Tender coconut.jpeg' },
+    { name: 'Meethapaan', category: 'ICE_CREAM', subcategory: 'Natural', flavor: 'Meethapaan', description: 'Traditional sweet betel leaf essence (90g)', price: 89.00, stock: 120, isAvailable: true, imageUrl: '/images/flavors/Meethapaan.jpeg' },
+    { name: 'Gulkand', category: 'ICE_CREAM', subcategory: 'Natural', flavor: 'Gulkand', description: 'Rose petal and fruit preserve blend (90g)', price: 89.00, stock: 120, isAvailable: true, imageUrl: '/images/flavors/Gulkand.jpeg' },
+    { name: 'Arabian Dates', category: 'ICE_CREAM', subcategory: 'Natural', flavor: 'Arabian Dates', description: 'Premium Arabian dates sweetness (90g)', price: 89.00, stock: 120, isAvailable: true, imageUrl: '/images/flavors/Arabian Dates.jpeg' },
+    { name: 'Berry Blast', category: 'ICE_CREAM', subcategory: 'Natural', flavor: 'Berry Blast', description: 'Mixed berry explosion taste (90g)', price: 89.00, stock: 120, isAvailable: true, imageUrl: '/images/flavors/Berry Blast.jpeg' },
+    { name: 'Berrylicious', category: 'ICE_CREAM', subcategory: 'Natural', flavor: 'Berrylicious', description: 'Delicious berry medley blend (90g)', price: 89.00, stock: 120, isAvailable: true, imageUrl: '/images/flavors/Berrylicious.jpeg' },
+    { name: 'Blue Berry', category: 'ICE_CREAM', subcategory: 'Natural', flavor: 'Blueberry', description: 'Premium blueberry flavor (90g)', price: 89.00, stock: 120, isAvailable: true, imageUrl: '/images/flavors/Blueberry.jpeg' },
+    { name: 'Pink Guava', category: 'ICE_CREAM', subcategory: 'Natural', flavor: 'Pink Guava', description: 'Tropical pink guava delight (90g)', price: 89.00, stock: 120, isAvailable: true, imageUrl: '/images/flavors/Pink Guava.jpeg' },
+    { name: 'Alphonso Mango', category: 'ICE_CREAM', subcategory: 'Natural', flavor: 'Alphonso Mango', description: 'King of mangoes flavor (90g)', price: 89.00, stock: 120, isAvailable: true, imageUrl: '/images/flavors/alphanso mango.jpeg' },
+
+    { name: 'Choco Almond Fudge', category: 'EXOTIC_CUP', subcategory: 'Exotic', flavor: 'Choco Almond Fudge', description: 'Rich chocolate with crunchy almonds (90g)', price: 99.00, stock: 100, isAvailable: true, imageUrl: '/images/flavors/choco Almond Fudge.jpeg' },
+    { name: 'Chocolate Bourbon', category: 'EXOTIC_CUP', subcategory: 'Exotic', flavor: 'Chocolate Bourbon', description: 'Dark chocolate with bourbon vanilla (90g)', price: 99.00, stock: 100, isAvailable: true, imageUrl: '/images/flavors/Chocolate Bourbon.jpeg' },
+    { name: 'Red Wine Berry', category: 'EXOTIC_CUP', subcategory: 'Exotic', flavor: 'Red Wine Berry', description: 'Elegant red wine with berry blend (90g)', price: 99.00, stock: 100, isAvailable: true, imageUrl: '/images/flavors/Red Wine Berry.jpeg' },
+    { name: 'Hazelnut Nuttella', category: 'EXOTIC_CUP', subcategory: 'Exotic', flavor: 'Hazelnut Nutella', description: 'Creamy hazelnut spread delight (90g)', price: 99.00, stock: 100, isAvailable: true, imageUrl: '/images/flavors/Hazelnut Nutella.jpeg' },
+    { name: 'Coffee Almond Fudge', category: 'EXOTIC_CUP', subcategory: 'Exotic', flavor: 'Coffee Almond Fudge', description: 'Aromatic coffee with almond fudge (90g)', price: 99.00, stock: 100, isAvailable: true, imageUrl: '/images/flavors/coffee Almond fudge.jpeg' },
+    { name: 'Spanish Delight', category: 'EXOTIC_CUP', subcategory: 'Exotic', flavor: 'Spanish Delight', description: 'Caramel with Spanish spice (90g)', price: 99.00, stock: 100, isAvailable: true, imageUrl: '/images/flavors/spanish delight.jpeg' },
+    { name: 'Tiramisu', category: 'EXOTIC_CUP', subcategory: 'Exotic', flavor: 'Tiramisu', description: 'Italian tiramisu with mascarpone (90g)', price: 99.00, stock: 100, isAvailable: true, imageUrl: '/images/flavors/Tiramisu.jpeg' },
+    { name: 'Fruits and Nuts', category: 'EXOTIC_CUP', subcategory: 'Exotic', flavor: 'Fruits and Nuts', description: 'Mixed fruits with assorted nuts (90g)', price: 99.00, stock: 100, isAvailable: true, imageUrl: '/images/flavors/fruits and nuts.jpeg' },
+
+    { name: 'Lotus Biscoff', category: 'EXOTIC_CUP', subcategory: 'Exotic Special', flavor: 'Lotus Biscoff', description: 'Caramel biscuit with lotus cookie crunch (90g)', price: 125.00, stock: 80, isAvailable: true, imageUrl: '/images/flavors/Lotus Biscoff .jpeg' },
+
+    { name: 'Sugar Free Vanilla', category: 'ICE_CREAM', subcategory: 'Sugar Free', flavor: 'Sugar Free Vanilla', description: 'Pure vanilla with zero sugar (90g)', price: 79.00, stock: 100, isAvailable: true, imageUrl: '/images/flavors/sugar free vannila.jpeg' },
   ];
 
   const dbProducts: any[] = [];
   for (const product of productsData) {
     const createdProduct = await prisma.product.create({ data: product });
     dbProducts.push(createdProduct);
-    console.log(`Created Product: ${createdProduct.name} (${createdProduct.category})`);
+    console.log(`Created Product: ${createdProduct.name} (${createdProduct.category} - ${createdProduct.subcategory})`);
   }
 
-  // 4. Create Mock Orders for Franchise
-  // Order 1: Delivered & Paid
   const order1 = await prisma.order.create({
     data: {
       franchiseId: franchise.id,
@@ -174,13 +123,12 @@ async function main() {
 
   await prisma.orderItem.createMany({
     data: [
-      { orderId: order1.id, productId: dbProducts[0].id, quantity: 2, priceAtPurchase: 250.00 }, // Belgian Chocolate
-      { orderId: order1.id, productId: dbProducts[2].id, quantity: 2, priceAtPurchase: 180.00 }, // Madagascar Vanilla
-      { orderId: order1.id, productId: dbProducts[4].id, quantity: 1, priceAtPurchase: 140.00 }, // Mango Shake
+      { orderId: order1.id, productId: dbProducts[0].id, quantity: 2, priceAtPurchase: 49.00 },
+      { orderId: order1.id, productId: dbProducts[3].id, quantity: 2, priceAtPurchase: 99.00 },
+      { orderId: order1.id, productId: dbProducts[29].id, quantity: 1, priceAtPurchase: 125.00 },
     ]
   });
 
-  // Create Invoice for Order 1
   await prisma.invoice.create({
     data: {
       orderId: order1.id,
@@ -189,7 +137,6 @@ async function main() {
     }
   });
 
-  // Create Payment record for Order 1
   await prisma.payment.create({
     data: {
       orderId: order1.id,
@@ -201,23 +148,22 @@ async function main() {
     }
   });
 
-  // Order 2: Dispatched & Unpaid (Outstanding balance)
   const order2 = await prisma.order.create({
     data: {
       franchiseId: franchise.id,
       status: 'DISPATCHED',
       totalAmount: 10593.22,
       gstAmount: 1906.78,
-      finalAmount: 12500.00, // Matching the outstanding balance of the franchise
+      finalAmount: 12500.00,
       paymentStatus: 'PENDING',
     }
   });
 
   await prisma.orderItem.createMany({
     data: [
-      { orderId: order2.id, productId: dbProducts[0].id, quantity: 20, priceAtPurchase: 250.00 },
-      { orderId: order2.id, productId: dbProducts[1].id, quantity: 20, priceAtPurchase: 220.00 },
-      { orderId: order2.id, productId: dbProducts[7].id, quantity: 10, priceAtPurchase: 320.00 },
+      { orderId: order2.id, productId: dbProducts[0].id, quantity: 20, priceAtPurchase: 49.00 },
+      { orderId: order2.id, productId: dbProducts[1].id, quantity: 20, priceAtPurchase: 49.00 },
+      { orderId: order2.id, productId: dbProducts[29].id, quantity: 10, priceAtPurchase: 125.00 },
     ]
   });
 
@@ -231,9 +177,7 @@ async function main() {
 
   console.log(`Created Mock Orders for store.`);
 
-  // 5. Create Mock Notifications & Announcements (Activities)
   const notificationsData = [
-    // --- Activities ---
     {
       userId: franchiseUser.id,
       type: 'ORDER',
@@ -249,11 +193,10 @@ async function main() {
       type: 'ORDER',
       message: 'New store credit account verified. Allotted limit: ₹1,50,000.00.',
     },
-    // --- Announcements ---
     {
       userId: franchiseUser.id,
       type: 'SYSTEM',
-      message: 'NEW MENU ARRIVAL: Exotic Mango Lotus Biscoff Sundae is now live! Outlets can place orders via the catalog.',
+      message: 'NEW MENU ARRIVAL: Legacy ice cream scoops are now live! Outlets can place orders via the catalog.',
     },
     {
       userId: franchiseUser.id,

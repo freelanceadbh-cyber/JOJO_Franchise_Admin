@@ -61,63 +61,79 @@ async function clearFranchiseBalance(franchiseId: string) {
 }
 
 async function getAdminData() {
-  // 1. Core Financial and Numerical Stats
-  const paidOrders = await prisma.order.findMany({
-    where: { paymentStatus: 'PAID' },
-    select: { finalAmount: true }
-  });
-  const totalRevenue = paidOrders.reduce((sum, order) => sum + Number(order.finalAmount), 0);
+  try {
+    const paidOrders = await prisma.order.findMany({
+      where: { paymentStatus: 'PAID' },
+      select: { finalAmount: true }
+    });
+    const totalRevenue = paidOrders.reduce((sum, order) => sum + Number(order.finalAmount), 0);
 
-  const pendingOrdersCount = await prisma.order.count({
-    where: { status: 'PENDING' }
-  });
+    const pendingOrdersCount = await prisma.order.count({
+      where: { status: 'PENDING' }
+    });
 
-  const activeFranchiseCount = await prisma.franchise.count();
+    const activeFranchiseCount = await prisma.franchise.count();
 
-  const franchisesData = await prisma.franchise.findMany({
-    include: { user: true }
-  });
-  const totalOutstanding = franchisesData.reduce((sum, f) => sum + Number(f.outstandingBalance), 0);
+    const franchisesData = await prisma.franchise.findMany({
+      include: { user: true }
+    });
+    const totalOutstanding = franchisesData.reduce((sum, f) => sum + Number(f.outstandingBalance), 0);
 
-  // 2. Orders Queue
-  const orders = await prisma.order.findMany({
-    orderBy: { createdAt: 'desc' },
-    include: { 
-      franchise: true,
-      orderItems: {
-        include: { product: true }
+    const orders = await prisma.order.findMany({
+      orderBy: { createdAt: 'desc' },
+      include: {
+        franchise: true,
+        orderItems: {
+          include: { product: true }
+        }
       }
-    }
-  });
+    });
 
-  // 3. Simple static analysis for custom SVG charts
-  // Mock monthly sales trend (normally aggregated from DB orders grouped by date)
-  const monthlySales = [
-    { month: 'Jan', sales: 45000 },
-    { month: 'Feb', sales: 58000 },
-    { month: 'Mar', sales: 62000 },
-    { month: 'Apr', sales: 78000 },
-    { month: 'May', sales: 95000 },
-    { month: 'Jun', sales: 120000 },
-  ];
+    const monthlySales = [
+      { month: 'Jan', sales: 45000 },
+      { month: 'Feb', sales: 58000 },
+      { month: 'Mar', sales: 62000 },
+      { month: 'Apr', sales: 78000 },
+      { month: 'May', sales: 95000 },
+      { month: 'Jun', sales: 120000 },
+    ];
 
-  // Category counts
-  const categoriesCount = {
-    ICE_CREAM: await prisma.product.count({ where: { category: 'ICE_CREAM' } }),
-    MILKSHAKE: await prisma.product.count({ where: { category: 'MILKSHAKE' } }),
-    EXOTIC_CUP: await prisma.product.count({ where: { category: 'EXOTIC_CUP' } }),
-  };
+    const categoriesCount = {
+      ICE_CREAM: await prisma.product.count({ where: { category: 'ICE_CREAM' } }),
+      MILKSHAKE: await prisma.product.count({ where: { category: 'MILKSHAKE' } }),
+      EXOTIC_CUP: await prisma.product.count({ where: { category: 'EXOTIC_CUP' } }),
+    };
 
-  return {
-    totalRevenue,
-    pendingOrdersCount,
-    activeFranchiseCount,
-    totalOutstanding,
-    orders,
-    franchises: franchisesData,
-    monthlySales,
-    categoriesCount
-  };
+    return {
+      totalRevenue,
+      pendingOrdersCount,
+      activeFranchiseCount,
+      totalOutstanding,
+      orders,
+      franchises: franchisesData,
+      monthlySales,
+      categoriesCount
+    };
+  } catch (error) {
+    console.error('Database connection failed. Using fallback data.', error);
+    return {
+      totalRevenue: 0,
+      pendingOrdersCount: 0,
+      activeFranchiseCount: 0,
+      totalOutstanding: 0,
+      orders: [],
+      franchises: [],
+      monthlySales: [
+        { month: 'Jan', sales: 0 },
+        { month: 'Feb', sales: 0 },
+        { month: 'Mar', sales: 0 },
+        { month: 'Apr', sales: 0 },
+        { month: 'May', sales: 0 },
+        { month: 'Jun', sales: 0 },
+      ],
+      categoriesCount: { ICE_CREAM: 0, MILKSHAKE: 0, EXOTIC_CUP: 0 }
+    };
+  }
 }
 
 export default async function AdminDashboard() {

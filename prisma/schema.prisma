@@ -45,6 +45,7 @@ model Product {
   id          String      @id @default(uuid())
   name        String
   category    String      // e.g. "Ice Cream", "Milkshake", "Exotic Cup"
+  subcategory String      // e.g. "Regular", "Classic", "Special", "Natural", "Exotic", "Exotic Special", "Sugar Free"
   flavor      String
   description String?
   price       Decimal
