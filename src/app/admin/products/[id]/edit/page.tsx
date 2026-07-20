@@ -52,19 +52,23 @@ export default async function EditProductPage({ params }: EditProductPageProps) 
     'use server';
     const name = formData.get('name') as string;
     const category = formData.get('category') as string;
+    const subcategory = formData.get('subcategory') as string;
     const flavor = formData.get('flavor') as string;
     const description = formData.get('description') as string;
     const price = parseFloat(formData.get('price') as string);
     const stock = parseInt(formData.get('stock') as string, 10);
+    const imageUrl = formData.get('imageUrl') as string;
     const isAvailable = formData.get('isAvailable') === 'true';
 
     await updateProduct(id, {
       name,
       category,
+      subcategory,
       flavor,
       description,
       price,
       stock,
+      imageUrl,
       isAvailable
     });
 
@@ -131,7 +135,25 @@ export default async function EditProductPage({ params }: EditProductPageProps) 
               </div>
             </div>
 
-            <div className="grid sm:grid-cols-3 gap-4">
+            <div className="grid sm:grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-bold uppercase text-muted-foreground tracking-widest block">Subcategory</label>
+                <select
+                  required
+                  name="subcategory"
+                  defaultValue={product.subcategory}
+                  className="w-full p-3 bg-background border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-crimson text-xs transition-all"
+                >
+                  <option value="Regular">Regular</option>
+                  <option value="Classic">Classic</option>
+                  <option value="Special">Special</option>
+                  <option value="Natural">Natural</option>
+                  <option value="Exotic">Exotic</option>
+                  <option value="Exotic Special">Exotic Special</option>
+                  <option value="Sugar Free">Sugar Free</option>
+                </select>
+              </div>
+
               <div className="space-y-1.5">
                 <label className="text-[10px] font-bold uppercase text-muted-foreground tracking-widest block">Primary Flavor Profile</label>
                 <input
@@ -143,7 +165,9 @@ export default async function EditProductPage({ params }: EditProductPageProps) 
                   className="w-full p-3 bg-background border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-crimson focus:border-transparent text-xs transition-all"
                 />
               </div>
+            </div>
 
+            <div className="grid sm:grid-cols-2 gap-4">
               <div className="space-y-1.5">
                 <label className="text-[10px] font-bold uppercase text-muted-foreground tracking-widest block">Wholesale Price (Excl. GST)</label>
                 <input
@@ -170,6 +194,19 @@ export default async function EditProductPage({ params }: EditProductPageProps) 
               </div>
             </div>
 
+            <div className="space-y-1.5">
+              <label className="text-[10px] font-bold uppercase text-muted-foreground tracking-widest block">Image Path</label>
+              <input
+                type="text"
+                required
+                name="imageUrl"
+                defaultValue={product.imageUrl || ''}
+                placeholder="e.g. /images/flavors/Vanilla.jpeg"
+                className="w-full p-3 bg-background border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-crimson focus:border-transparent text-xs transition-all"
+              />
+              <p className="text-[10px] text-muted-foreground">Place images in public/images/flavors/ and enter the relative path.</p>
+            </div>
+
             <div className="grid sm:grid-cols-2 gap-4">
               <div className="space-y-1.5">
                 <label className="text-[10px] font-bold uppercase text-muted-foreground tracking-widest block">Listing Availability</label>
@@ -180,7 +217,7 @@ export default async function EditProductPage({ params }: EditProductPageProps) 
                   className="w-full p-3 bg-background border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-crimson text-xs transition-all"
                 >
                   <option value="true">Enable (Show in Outlets Catalog)</option>
-                  <option value="false">Disable (Hide in Catalog)</option>
+                  <option value="false">Disable (Hide from Catalog / Out of Stock)</option>
                 </select>
               </div>
             </div>

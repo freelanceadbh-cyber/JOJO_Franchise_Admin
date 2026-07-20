@@ -150,19 +150,15 @@ export default async function AdminOrdersPage() {
               <span className="text-[9px] text-muted-foreground uppercase tracking-widest font-bold">HQ Admin</span>
             </div>
           </div>
-          <button 
-            onClick={() => {
-              const form = document.createElement('form');
-              form.method = 'POST';
-              form.action = '/api/auth/signout';
-              document.body.appendChild(form);
-              form.submit();
-            }}
-            className="w-full py-3 hover:bg-red-50 dark:hover:bg-red-950/20 text-red-600 font-bold rounded-2xl text-sm flex items-center justify-center gap-2 transition-all cursor-pointer border-0 bg-transparent"
-          >
-            <LogOut size={16} />
-            Log Out
-          </button>
+          <form action="/api/auth/signout" method="POST" className="w-full">
+            <button 
+              type="submit"
+              className="w-full py-3 hover:bg-red-50 dark:hover:bg-red-950/20 text-red-600 font-bold rounded-2xl text-sm flex items-center justify-center gap-2 transition-all cursor-pointer border-0 bg-transparent"
+            >
+              <LogOut size={16} />
+              Log Out
+            </button>
+          </form>
         </div>
       </aside>
 

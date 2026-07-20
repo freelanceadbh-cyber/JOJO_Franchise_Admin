@@ -19,6 +19,7 @@ import {
   PieChart
 } from 'lucide-react';
 import Link from 'next/link';
+import PrintButton from '@/components/print-button';
 
 async function getReportData() {
   // 1. Fetch settled orders (PAID)
@@ -150,19 +151,15 @@ export default async function AdminReportsPage() {
               <span className="text-[9px] text-muted-foreground uppercase tracking-widest font-bold">HQ Admin</span>
             </div>
           </div>
-          <button 
-            onClick={() => {
-              const form = document.createElement('form');
-              form.method = 'POST';
-              form.action = '/api/auth/signout';
-              document.body.appendChild(form);
-              form.submit();
-            }}
-            className="w-full py-3 hover:bg-red-50 dark:hover:bg-red-950/20 text-red-600 font-bold rounded-2xl text-sm flex items-center justify-center gap-2 transition-all cursor-pointer border-0 bg-transparent"
-          >
-            <LogOut size={16} />
-            Log Out
-          </button>
+          <form action="/api/auth/signout" method="POST" className="w-full">
+            <button 
+              type="submit"
+              className="w-full py-3 hover:bg-red-50 dark:hover:bg-red-950/20 text-red-600 font-bold rounded-2xl text-sm flex items-center justify-center gap-2 transition-all cursor-pointer border-0 bg-transparent"
+            >
+              <LogOut size={16} />
+              Log Out
+            </button>
+          </form>
         </div>
       </aside>
 
@@ -174,14 +171,9 @@ export default async function AdminReportsPage() {
             <p className="text-xs text-muted-foreground">HQ wholesale audits and tax liability reports.</p>
           </div>
           <div className="flex gap-2">
-            <button 
-              onClick={() => {
-                if (typeof window !== 'undefined') window.print();
-              }}
-              className="px-4 py-2 bg-brand-crimson hover:bg-brand-crimson/95 text-white font-bold rounded-xl text-xs flex items-center gap-1.5 transition-transform cursor-pointer border-0 shadow-md shadow-brand-crimson/15"
-            >
+            <PrintButton className="px-4 py-2 bg-brand-crimson hover:bg-brand-crimson/95 text-white font-bold rounded-xl text-xs flex items-center gap-1.5 transition-transform cursor-pointer border-0 shadow-md shadow-brand-crimson/15">
               Export Page Reports
-            </button>
+            </PrintButton>
           </div>
         </header>
 
