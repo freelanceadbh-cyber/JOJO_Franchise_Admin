@@ -4,7 +4,7 @@ import { auth } from '@/auth';
 import { redirect } from 'next/navigation';
 import CatalogClient from './catalog-client';
 
-export default async function CatalogPage() {
+export default async function CatalogPage({ searchParams }: { searchParams: Promise<{ error?: string }> }) {
   const session = await auth();
 
   if (!session?.user) {
@@ -14,9 +14,15 @@ export default async function CatalogPage() {
     redirect('/admin');
   }
 
+  const { error: errorParam } = await searchParams;
+
   let products: any[] = [];
   let franchise: any = null;
   let dbError: string | null = null;
+
+  if (errorParam === 'stale-cart') {
+    dbError = 'Your cart contained items that are no longer available. Please review the updated catalog and place a new order.';
+  }
 
   console.log('CatalogPage: Fetching products...');
 
