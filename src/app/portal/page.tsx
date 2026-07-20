@@ -134,6 +134,10 @@ export default async function PortalDashboard() {
             <History size={18} />
             Order History
           </Link>
+          <Link href="/portal/proforma-invoices" className="flex items-center gap-3 px-4 py-3 text-muted-foreground hover:text-brand-crimson hover:bg-brand-pink/30 rounded-2xl text-sm transition-all">
+            <FileText size={18} />
+            Proforma Invoices
+          </Link>
           <Link href="/portal/messages" className="flex items-center gap-3 px-4 py-3 text-muted-foreground hover:text-brand-crimson hover:bg-brand-pink/30 rounded-2xl text-sm transition-all">
             <MessageSquare size={18} />
             HQ Messages

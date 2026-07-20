@@ -11,6 +11,7 @@ export async function POST(req: Request) {
     }
 
     const {
+      dbOrderId,
       razorpayPaymentId,
       razorpayOrderId,
       razorpaySignature,
@@ -75,18 +76,38 @@ export async function POST(req: Request) {
     const gstAmount = subtotal * 0.18;
     const finalAmount = subtotal + gstAmount;
 
-    // 4. Create the Order
-    const order = await prisma.order.create({
-      data: {
-        franchiseId: franchise.id,
-        status: 'CONFIRMED', // Paid, so confirmed
-        totalAmount: subtotal,
-        gstAmount,
-        finalAmount,
-        paymentStatus: 'PAID',
-        orderItems: {
-          create: itemsToCreate
+    // 4. Find and Update the existing Order and Proforma Invoice
+    const order = await prisma.order.findUnique({
+      where: { id: dbOrderId },
+      include: { proformaInvoice: true }
+    });
+
+    if (!order) {
+      return NextResponse.json({ error: 'Order not found' }, { status: 404 });
+    }
+
+    if (order.franchiseId !== franchise.id) {
+      return NextResponse.json({ error: 'Unauthorized order access' }, { status: 403 });
+    }
+
+    await prisma.$transaction(async (tx) => {
+      // Update order status to CONFIRMED and paymentStatus to PAID
+      await tx.order.update({
+        where: { id: order.id },
+        data: {
+          status: 'CONFIRMED',
+          paymentStatus: 'PAID'
         }
+      });
+
+      // Update associated ProformaInvoice status to PAID
+      if (order.proformaInvoice) {
+        await tx.proformaInvoice.update({
+          where: { id: order.proformaInvoice.id },
+          data: {
+            status: 'PAID'
+          }
+        });
       }
     });
 
