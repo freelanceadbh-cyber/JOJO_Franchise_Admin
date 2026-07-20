@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, Suspense } from 'react';
+import React, { useState, Suspense, useEffect } from 'react';
 import { signIn } from 'next-auth/react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { IceCream, Loader2, ArrowRight, Lock, Mail } from 'lucide-react';
@@ -14,6 +14,14 @@ function SignInForm() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [csrfToken, setCsrfToken] = useState<string>('');
+
+  useEffect(() => {
+    fetch('/api/auth/csrf')
+      .then((r) => r.json())
+      .then((data) => setCsrfToken(data.csrfToken || ''))
+      .catch(() => setError('Failed to load security token. Please refresh.'));
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -24,6 +32,7 @@ function SignInForm() {
       const res = await signIn('credentials', {
         email,
         password,
+        csrfToken,
         redirect: false,
       });
 
@@ -33,7 +42,6 @@ function SignInForm() {
         return;
       }
 
-      // Fetch user session dynamically to determine dynamic route
       const sessionRes = await fetch('/api/auth/session').then((r) => r.json());
       
       let redirectUrl = callbackUrl;
@@ -106,9 +114,11 @@ function SignInForm() {
           </div>
         </div>
 
+        <input type="hidden" name="csrfToken" value={csrfToken} />
+
         <button
           type="submit"
-          disabled={loading}
+          disabled={loading || !csrfToken}
           className="w-full py-4 bg-brand-crimson hover:bg-brand-crimson/95 text-white font-bold rounded-2xl flex items-center justify-center gap-2 hover:gap-3 transition-all duration-300 shadow-lg shadow-brand-crimson/20 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {loading ? (

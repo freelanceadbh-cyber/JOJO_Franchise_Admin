@@ -19,12 +19,10 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           include: { franchise: true },
         });
 
-        // Ensure user exists and is active
         if (!user || user.status !== 'ACTIVE') {
           return null;
         }
 
-        // Compare password hashes
         const isValidPassword = await bcrypt.compare(
           credentials.password as string,
           user.passwordHash
