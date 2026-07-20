@@ -81,7 +81,10 @@ export async function POST(req: Request) {
         where: { id: item.productId }
       });
       if (!product) {
-        return NextResponse.json({ error: `Product ${item.name} not found` }, { status: 400 });
+        return NextResponse.json({ 
+          error: `Product "${item.name || item.productId}" not found in catalog. It may have been removed or the catalog was updated. Please clear your cart and try again.`,
+          code: 'PRODUCT_NOT_FOUND'
+        }, { status: 400 });
       }
       const price = Number(product.price);
       subtotal += price * item.quantity;

@@ -72,12 +72,18 @@ export default function CatalogClient({ initialProducts, userName, storeName, db
     const savedCart = localStorage.getItem('jojo_cart_items');
     if (savedCart) {
       try {
-        setCart(JSON.parse(savedCart));
+        const parsed = JSON.parse(savedCart) as CartItem[];
+        const validIds = new Set(initialProducts.map(p => p.id));
+        const validCart = parsed.filter(item => validIds.has(item.productId));
+        if (validCart.length !== parsed.length) {
+          localStorage.setItem('jojo_cart_items', JSON.stringify(validCart));
+        }
+        setCart(validCart);
       } catch (e) {
         console.error('Failed to parse cart items:', e);
       }
     }
-  }, []);
+  }, [initialProducts]);
 
   const saveCartToStorage = (updatedCart: CartItem[]) => {
     setCart(updatedCart);

@@ -104,7 +104,13 @@ export default function CheckoutClient({
       });
 
       if (!res.ok) {
-        throw new Error('Failed to initialize order details with server.');
+        const data = await res.json().catch(() => ({}));
+        if (data.code === 'PRODUCT_NOT_FOUND') {
+          localStorage.removeItem('jojo_cart_items');
+          router.push('/portal/catalog?error=stale-cart');
+          return;
+        }
+        throw new Error(data.error || 'Failed to initialize order details with server.');
       }
 
       const orderData = await res.json();
@@ -190,7 +196,13 @@ export default function CheckoutClient({
       });
 
       if (!res.ok) {
-        throw new Error('Failed to generate proforma invoice.');
+        const data = await res.json().catch(() => ({}));
+        if (data.code === 'PRODUCT_NOT_FOUND') {
+          localStorage.removeItem('jojo_cart_items');
+          router.push('/portal/catalog?error=stale-cart');
+          return;
+        }
+        throw new Error(data.error || 'Failed to generate proforma invoice.');
       }
 
       const orderData = await res.json();
