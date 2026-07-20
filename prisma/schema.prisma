@@ -67,11 +67,12 @@ model Order {
   finalAmount   Decimal
   paymentStatus String        @default("PENDING") // "PENDING", "PAID", "FAILED"
   
-  orderItems    OrderItem[]
-  payments      Payment[]
-  invoice       Invoice?
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
+  orderItems      OrderItem[]
+  payments        Payment[]
+  invoice         Invoice?
+  proformaInvoice ProformaInvoice?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
 }
 
 model OrderItem {
@@ -105,6 +106,16 @@ model Invoice {
   pdfUrl        String?
   gstDetails    String?
   createdAt     DateTime @default(now())
+}
+
+model ProformaInvoice {
+  id             String   @id @default(uuid())
+  orderId        String   @unique
+  order          Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  proformaNumber String   @unique // e.g. PI-YYYY-000001
+  createdAt      DateTime @default(now())
+  validUntil     DateTime
+  status         String   @default("PENDING_PAYMENT") // "PENDING_PAYMENT", "PAID", "EXPIRED", "CANCELLED"
 }
 
 model Message {

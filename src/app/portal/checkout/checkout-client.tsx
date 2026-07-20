@@ -27,9 +27,15 @@ interface CheckoutClientProps {
     email: string;
     name: string;
   };
+  preloadedItems?: CartItem[];
+  preloadedOrderId?: string;
 }
 
-export default function CheckoutClient({ franchiseDetails }: CheckoutClientProps) {
+export default function CheckoutClient({ 
+  franchiseDetails,
+  preloadedItems,
+  preloadedOrderId
+}: CheckoutClientProps) {
   const router = useRouter();
   
   const [cart, setCart] = useState<CartItem[]>([]);
@@ -40,9 +46,17 @@ export default function CheckoutClient({ franchiseDetails }: CheckoutClientProps
   const [simulatorOpen, setSimulatorOpen] = useState(false);
   const [mockOrderId, setMockOrderId] = useState('');
   const [mockAmount, setMockAmount] = useState(0);
+  const [dbOrderId, setDbOrderId] = useState<string | null>(null);
 
-  // Initialize cart from localStorage on mount
+  // Initialize cart from localStorage or preloaded items on mount
   useEffect(() => {
+    if (preloadedItems && preloadedItems.length > 0) {
+      setCart(preloadedItems);
+      if (preloadedOrderId) {
+        setDbOrderId(preloadedOrderId);
+      }
+      return;
+    }
     const savedCart = localStorage.getItem('jojo_cart_items');
     if (savedCart) {
       try {
@@ -58,7 +72,7 @@ export default function CheckoutClient({ franchiseDetails }: CheckoutClientProps
     } else {
       router.push('/portal/catalog');
     }
-  }, [router]);
+  }, [router, preloadedItems, preloadedOrderId]);
 
   // Load Razorpay Script dynamically for live mode
   const loadRazorpayScript = () => {
@@ -86,7 +100,7 @@ export default function CheckoutClient({ franchiseDetails }: CheckoutClientProps
       const res = await fetch('/api/checkout/razorpay-order', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ items: cart })
+        body: JSON.stringify({ items: cart, dbOrderId: dbOrderId })
       });
 
       if (!res.ok) {
@@ -94,6 +108,7 @@ export default function CheckoutClient({ franchiseDetails }: CheckoutClientProps
       }
 
       const orderData = await res.json();
+      setDbOrderId(orderData.dbOrderId);
       
       // If we are in test mode or keys are mock, trigger the Sandbox Simulator Modal
       if (orderData.keyId === 'rzp_test_mock' || orderData.orderId.startsWith('order_mock_')) {
@@ -132,6 +147,7 @@ export default function CheckoutClient({ franchiseDetails }: CheckoutClientProps
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
+                dbOrderId: orderData.dbOrderId,
                 razorpayPaymentId: response.razorpay_payment_id,
                 razorpayOrderId: response.razorpay_order_id,
                 razorpaySignature: response.razorpay_signature,
@@ -162,6 +178,30 @@ export default function CheckoutClient({ franchiseDetails }: CheckoutClientProps
     }
   };
 
+  const handleGenerateProformaOnly = async () => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const res = await fetch('/api/checkout/razorpay-order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ items: cart, dbOrderId: dbOrderId })
+      });
+
+      if (!res.ok) {
+        throw new Error('Failed to generate proforma invoice.');
+      }
+
+      const orderData = await res.json();
+      localStorage.removeItem('jojo_cart_items');
+      router.push(`/portal/proforma-invoices/${orderData.proformaId}`);
+    } catch (err: any) {
+      setError(err.message || 'Proforma generation failed. Try again.');
+      setLoading(false);
+    }
+  };
+
   // Simulator payment completion handler
   const handleSimulatedPayment = async (success: boolean) => {
     setSimulatorOpen(false);
@@ -178,6 +218,7 @@ export default function CheckoutClient({ franchiseDetails }: CheckoutClientProps
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          dbOrderId: dbOrderId,
           razorpayPaymentId: 'pay_sim_' + Math.random().toString(36).substring(2, 10),
           razorpayOrderId: mockOrderId,
           razorpaySignature: 'sig_sim_' + Math.random().toString(36).substring(2, 10),
@@ -327,23 +368,59 @@ export default function CheckoutClient({ franchiseDetails }: CheckoutClientProps
             <span>Fully encrypted transaction. Razorpay payment verification covers real-time order locking and stock reservations.</span>
           </div>
 
-          <button
-            onClick={handlePayment}
-            disabled={loading}
-            className="w-full py-4 bg-brand-crimson hover:bg-brand-crimson/95 text-white font-bold rounded-2xl text-xs flex items-center justify-center gap-2 hover:scale-[1.01] transition-all cursor-pointer shadow-lg shadow-brand-crimson/20 border-0 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {loading ? (
-              <>
-                <Loader2 className="animate-spin" size={14} />
-                Securing Gateway...
-              </>
-            ) : (
-              <>
-                <CreditCard size={14} />
-                Pay via Razorpay
-              </>
-            )}
-          </button>
+          {dbOrderId ? (
+            <div className="space-y-4">
+              <button
+                onClick={handlePayment}
+                disabled={loading}
+                className="w-full py-4 bg-brand-crimson hover:bg-brand-crimson/95 text-white font-bold rounded-2xl text-xs flex items-center justify-center gap-2 hover:scale-[1.01] transition-all cursor-pointer shadow-lg shadow-brand-crimson/20 border-0 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {loading ? (
+                  <>
+                    <Loader2 className="animate-spin" size={14} />
+                    Securing Gateway...
+                  </>
+                ) : (
+                  <>
+                    <CreditCard size={14} />
+                    Pay via Razorpay
+                  </>
+                )}
+              </button>
+
+              {/* Bank Transfer Instructions */}
+              <div className="p-5 rounded-2xl border border-border bg-muted/30 space-y-2">
+                <h4 className="text-[11px] font-bold text-foreground uppercase tracking-wider">Option 2: Direct Bank Transfer</h4>
+                <p className="text-[10px] text-muted-foreground leading-relaxed">
+                  You can transfer the grand total directly to the HQ bank account. Once transferred, please email the transaction receipt to billing@jojo.com with your Proforma Number as the subject.
+                </p>
+                <div className="pt-2 font-mono text-[10px] space-y-1 text-foreground bg-card/50 p-3 rounded-xl border border-border/40">
+                  <p><span className="text-muted-foreground">Account Name:</span> JoJo Ice Creams HQ</p>
+                  <p><span className="text-muted-foreground">Account Number:</span> 987654321098</p>
+                  <p><span className="text-muted-foreground">Bank Name:</span> HDFC Bank Ltd</p>
+                  <p><span className="text-muted-foreground">IFSC Code:</span> HDFC0001234</p>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <button
+              onClick={handleGenerateProformaOnly}
+              disabled={loading}
+              className="w-full py-4 bg-brand-crimson hover:bg-brand-crimson/95 text-white font-bold rounded-2xl text-xs flex items-center justify-center gap-2 hover:scale-[1.01] transition-all cursor-pointer shadow-lg shadow-brand-crimson/20 border-0 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {loading ? (
+                <>
+                  <Loader2 className="animate-spin" size={14} />
+                  Generating Proforma...
+                </>
+              ) : (
+                <>
+                  <FileText size={14} />
+                  Generate Proforma Invoice
+                </>
+              )}
+            </button>
+          )}
         </div>
 
       </div>

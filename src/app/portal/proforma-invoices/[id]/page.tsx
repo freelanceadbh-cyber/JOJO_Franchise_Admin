@@ -4,21 +4,21 @@ import { auth } from '@/auth';
 import { redirect } from 'next/navigation';
 import { 
   ArrowLeft, 
-  CheckCircle,
-  FileText,
   ShieldAlert,
+  FileText,
+  DollarSign,
   IceCream
 } from 'lucide-react';
 import Link from 'next/link';
 import PrintButton from '@/components/print-button';
 
-interface InvoicePageProps {
+interface ProformaInvoicePageProps {
   params: Promise<{
     id: string;
   }>;
 }
 
-export default async function InvoicePage({ params }: InvoicePageProps) {
+export default async function ProformaInvoiceDetailPage({ params }: ProformaInvoicePageProps) {
   const session = await auth();
   if (!session?.user) {
     redirect('/auth/signin');
@@ -26,48 +26,52 @@ export default async function InvoicePage({ params }: InvoicePageProps) {
 
   const { id } = await params;
 
-  // Fetch order details with associated invoice, items, products, and payments
-  const order = await prisma.order.findUnique({
+  // Fetch proforma invoice details with associated order, items, products, and franchise
+  const proforma = await prisma.proformaInvoice.findUnique({
     where: { id },
     include: {
-      franchise: {
-        include: { user: true }
-      },
-      invoice: true,
-      orderItems: {
-        include: { product: true }
-      },
-      payments: true
+      order: {
+        include: {
+          franchise: {
+            include: { user: true }
+          },
+          orderItems: {
+            include: { product: true }
+          },
+          payments: true
+        }
+      }
     }
   });
 
-  if (!order || !order.invoice) {
+  if (!proforma) {
     return (
       <div className="min-h-screen flex items-center justify-center p-6 bg-background">
         <div className="max-w-md p-8 bg-card border border-border rounded-3xl text-center space-y-4 shadow-lg">
           <ShieldAlert size={48} className="text-red-500 mx-auto" />
-          <h1 className="text-xl font-bold text-foreground">Invoice Not Found</h1>
+          <h1 className="text-xl font-bold text-foreground">Proforma Invoice Not Found</h1>
           <p className="text-sm text-muted-foreground">
-            We could not locate a settled tax invoice for this order record. Please verify that payment was fully cleared.
+            We could not locate the proforma invoice record you are looking for.
           </p>
-          <Link href="/portal" className="inline-block px-5 py-2.5 bg-brand-crimson text-white font-bold rounded-2xl text-xs transition-colors">
-            Return to Dashboard
+          <Link href="/portal/proforma-invoices" className="inline-block px-5 py-2.5 bg-brand-crimson text-white font-bold rounded-2xl text-xs transition-colors">
+            Return to list
           </Link>
         </div>
       </div>
     );
   }
 
-  // Ensure security: only mapped franchise owner or admin can view this invoice
-  if (session.user.role !== 'ADMIN' && order.franchise.userId !== session.user.id) {
+  // Security guard: only mapped franchise owner or admin can view this proforma invoice
+  if (session.user.role !== 'ADMIN' && proforma.order.franchise.userId !== session.user.id) {
     redirect('/portal');
   }
 
-  const invoiceNumber = order.invoice.invoiceNumber;
+  const order = proforma.order;
+  const isPending = proforma.status === 'PENDING_PAYMENT';
   const payment = order.payments[0];
 
-  // QR Code pointing to public verification page
-  const verificationUrl = `${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/verify/invoice/${invoiceNumber}`;
+  // QR Code pointing to this view page for verification
+  const verificationUrl = `${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/portal/proforma-invoices/${id}`;
   const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${encodeURIComponent(verificationUrl)}`;
 
   // Financial computations
@@ -82,21 +86,30 @@ export default async function InvoicePage({ params }: InvoicePageProps) {
       {/* Action Header Panel - Hidden on print */}
       <div className="max-w-3xl mx-auto mb-6 flex items-center justify-between no-print bg-card border border-border p-4 rounded-2xl shadow-xs">
         <Link 
-          href="/portal/orders" 
+          href="/portal/proforma-invoices" 
           className="flex items-center gap-1.5 font-bold text-muted-foreground hover:text-brand-crimson transition-colors"
         >
           <ArrowLeft size={16} />
-          Back to Shipments
+          Back to Proformas
         </Link>
         <div className="flex gap-2">
-          <PrintButton className="px-5 py-2.5 bg-brand-crimson hover:bg-brand-crimson/95 text-white font-bold rounded-xl text-xs flex items-center gap-1.5 transition-all shadow-md shadow-brand-crimson/15 cursor-pointer border-0" />
+          {isPending && (
+            <Link 
+              href={`/portal/checkout?orderId=${order.id}`}
+              className="px-5 py-2.5 bg-brand-crimson hover:bg-brand-crimson/95 text-white font-bold rounded-xl text-xs flex items-center gap-1.5 transition-all shadow-md shadow-brand-crimson/15 cursor-pointer border-0"
+            >
+              <DollarSign size={14} />
+              Pay Now
+            </Link>
+          )}
+          <PrintButton />
         </div>
       </div>
 
       {/* Printable Invoice Container */}
       <div className="max-w-3xl mx-auto bg-white text-slate-800 p-8 sm:p-12 border border-slate-200 rounded-3xl shadow-sm relative print-container print:border-none print:shadow-none print:p-0">
         
-        {/* Invoice Top Ribbon Brand */}
+        {/* Proforma Top Ribbon Brand */}
         <div className="flex justify-between items-start gap-4 border-b border-slate-200 pb-8">
           <div>
             <div className="flex items-center gap-1.5 mb-2">
@@ -116,11 +129,12 @@ export default async function InvoicePage({ params }: InvoicePageProps) {
           </div>
           
           <div className="text-right">
-            <h1 className="text-xl font-black text-slate-900 uppercase tracking-tight">Tax Invoice</h1>
+            <h1 className="text-xl font-black text-slate-900 uppercase tracking-tight">Proforma Invoice</h1>
             <div className="mt-2.5 font-mono space-y-0.5">
-              <p><span className="font-bold text-slate-900">Invoice No:</span> {invoiceNumber}</p>
-              <p><span className="font-bold text-slate-500">Date:</span> {new Date(order.createdAt).toLocaleDateString('en-IN')}</p>
-              <p><span className="font-bold text-slate-500">Status:</span> PAID</p>
+              <p><span className="font-bold text-slate-900">Proforma No:</span> {proforma.proformaNumber}</p>
+              <p><span className="font-bold text-slate-500">Date:</span> {new Date(proforma.createdAt).toLocaleDateString('en-IN')}</p>
+              <p><span className="font-bold text-slate-500">Valid Until:</span> {new Date(proforma.validUntil).toLocaleDateString('en-IN')}</p>
+              <p><span className="font-bold text-slate-500">Status:</span> <span className="font-extrabold uppercase" style={{ color: proforma.status === 'PAID' ? 'green' : proforma.status === 'PENDING_PAYMENT' ? '#D68A00' : 'slate' }}>{proforma.status.replace('_', ' ')}</span></p>
             </div>
           </div>
         </div>
@@ -140,12 +154,20 @@ export default async function InvoicePage({ params }: InvoicePageProps) {
           
           <div className="sm:text-right">
             <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider block mb-1.5">Payment Details</span>
-            <p className="text-slate-500 leading-relaxed font-mono">
-              <span className="font-bold text-slate-800">Gateway:</span> Razorpay Merchant<br />
-              <span className="font-bold text-slate-800">Transaction ID:</span> {payment?.paymentId || 'MOCK_SANDBOX'}<br />
-              <span className="font-bold text-slate-800">Date settled:</span> {new Date(order.createdAt).toLocaleDateString('en-IN')}<br />
-              <span className="font-bold text-slate-800">Mode:</span> Standard Card/UPI
-            </p>
+            {proforma.status === 'PAID' ? (
+              <p className="text-slate-500 leading-relaxed font-mono">
+                <span className="font-bold text-slate-800">Gateway:</span> Razorpay Merchant<br />
+                <span className="font-bold text-slate-800">Transaction ID:</span> {payment?.paymentId || 'MOCK_SANDBOX'}<br />
+                <span className="font-bold text-slate-800">Date settled:</span> {payment ? new Date(payment.createdAt).toLocaleDateString('en-IN') : 'N/A'}<br />
+                <span className="font-bold text-slate-800">Mode:</span> Standard Card/UPI
+              </p>
+            ) : (
+              <p className="text-slate-500 leading-relaxed font-mono">
+                <span className="font-bold text-slate-800">Payment Status:</span> UNPAID<br />
+                <span className="font-bold text-slate-800">Due Amount:</span> ₹{grandTotal.toFixed(2)}<br />
+                <span className="font-bold text-red-500">Action Required:</span> Settlement required prior to stock packing.
+              </p>
+            )}
           </div>
         </div>
 
@@ -199,9 +221,9 @@ export default async function InvoicePage({ params }: InvoicePageProps) {
               className="w-20 h-20 border border-slate-200 bg-white rounded-lg"
             />
             <div className="space-y-1">
-              <span className="text-[9px] font-bold text-emerald-700 uppercase tracking-wider block">GST Compliant Seal</span>
+              <span className="text-[9px] font-bold text-amber-700 uppercase tracking-wider block">B2B Quotation Seal</span>
               <p className="text-[10px] text-slate-500 leading-relaxed">
-                Scan this QR code with any smartphone to verify this wholesale tax invoice directly on the secure JoJo ledger registry.
+                Scan this QR code to verify this proforma invoice quotation online or trigger immediate digital settlement via our secure gateway interface.
               </p>
             </div>
           </div>
@@ -229,8 +251,9 @@ export default async function InvoicePage({ params }: InvoicePageProps) {
 
         {/* Invoice Footer note */}
         <div className="border-t border-slate-200 mt-12 pt-6 text-center text-slate-400 text-[10px]">
-          <p>Thank you for partnering with JoJo Ice Creams! This is a system-generated secure tax invoice.</p>
-          <p className="mt-1">For any queries regarding credit adjustments or delivery issues, reach out to HQ Billing operations.</p>
+          <p className="font-bold text-slate-500">IMPORTANT NOTICE</p>
+          <p className="mt-1">This is a Proforma Invoice/Quotation and NOT a final tax invoice. It serves as a payment request.</p>
+          <p className="mt-1">Stock packing and dispatches will only be initiated upon complete payment settlement of this proforma invoice.</p>
         </div>
 
       </div>

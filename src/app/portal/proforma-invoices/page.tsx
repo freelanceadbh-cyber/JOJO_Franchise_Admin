@@ -11,40 +11,52 @@ import {
   LogOut, 
   ArrowLeft,
   FileText,
-  Truck,
+  Printer,
   Eye,
-  Calendar
+  Calendar,
+  DollarSign
 } from 'lucide-react';
 import Link from 'next/link';
+import ThemeToggle from '@/components/theme-toggle';
 
-async function getFranchiseOrders(userId: string) {
+async function getProformaInvoices(userId: string) {
   // Find mapped franchise profile first
   const franchise = await prisma.franchise.findUnique({
     where: { userId }
   });
 
-  if (!franchise) return { franchise: null, orders: [] };
+  if (!franchise) return { franchise: null, proformas: [] };
 
-  const orders = await prisma.order.findMany({
-    where: { franchiseId: franchise.id },
+  const proformas = await prisma.proformaInvoice.findMany({
+    where: {
+      order: {
+        franchiseId: franchise.id
+      }
+    },
     orderBy: { createdAt: 'desc' },
     include: {
-      orderItems: {
-        include: { product: true }
+      order: {
+        include: {
+          orderItems: {
+            include: {
+              product: true
+            }
+          }
+        }
       }
     }
   });
 
-  return { franchise, orders };
+  return { franchise, proformas };
 }
 
-export default async function OrderHistoryPage() {
+export default async function ProformaInvoicesPage() {
   const session = await auth();
   if (!session?.user) {
     redirect('/auth/signin');
   }
 
-  const { franchise, orders } = await getFranchiseOrders(session.user.id);
+  const { franchise, proformas } = await getProformaInvoices(session.user.id);
   if (!franchise) {
     redirect('/portal');
   }
@@ -72,11 +84,11 @@ export default async function OrderHistoryPage() {
             <ShoppingBag size={18} />
             Order Catalog
           </Link>
-          <Link href="/portal/orders" className="flex items-center gap-3 px-4 py-3 bg-secondary text-secondary-foreground font-bold rounded-2xl text-sm transition-all">
+          <Link href="/portal/orders" className="flex items-center gap-3 px-4 py-3 text-muted-foreground hover:text-brand-crimson hover:bg-brand-pink/30 rounded-2xl text-sm transition-all">
             <History size={18} />
             Order History
           </Link>
-          <Link href="/portal/proforma-invoices" className="flex items-center gap-3 px-4 py-3 text-muted-foreground hover:text-brand-crimson hover:bg-brand-pink/30 rounded-2xl text-sm transition-all">
+          <Link href="/portal/proforma-invoices" className="flex items-center gap-3 px-4 py-3 bg-secondary text-secondary-foreground font-bold rounded-2xl text-sm transition-all">
             <FileText size={18} />
             Proforma Invoices
           </Link>
@@ -116,9 +128,12 @@ export default async function OrderHistoryPage() {
               <ArrowLeft size={18} />
             </Link>
             <div>
-              <h1 className="text-lg font-bold text-foreground">Shipment Logs</h1>
-              <p className="text-xs text-muted-foreground">Historical order fulfillment tracking list.</p>
+              <h1 className="text-lg font-bold text-foreground">Proforma Invoices</h1>
+              <p className="text-xs text-muted-foreground">Draft order payments requests and quotations.</p>
             </div>
+          </div>
+          <div className="flex items-center gap-3">
+            <ThemeToggle />
           </div>
         </header>
 
@@ -126,17 +141,17 @@ export default async function OrderHistoryPage() {
           <div className="p-6 rounded-3xl border border-border bg-card shadow-sm space-y-6">
             <div className="flex justify-between items-center pb-4 border-b border-border/60">
               <h2 className="text-sm font-bold text-foreground flex items-center gap-1.5">
-                <History size={16} className="text-brand-crimson" />
-                Store Invoices & Status Timeline
+                <FileText size={16} className="text-brand-crimson" />
+                Store Proforma Invoices & Quotations
               </h2>
             </div>
 
-            {orders.length === 0 ? (
+            {proformas.length === 0 ? (
               <div className="py-20 text-center space-y-3">
-                <ShoppingBag size={48} className="text-muted-foreground mx-auto opacity-35" />
-                <h3 className="text-md font-bold text-foreground">No orders tracked yet</h3>
+                <FileText size={48} className="text-muted-foreground mx-auto opacity-35" />
+                <h3 className="text-md font-bold text-foreground">No proforma invoices found</h3>
                 <p className="text-xs text-muted-foreground max-w-xs mx-auto">
-                  You haven&apos;t placed any wholesale replenishment orders yet. Navigate to the catalog to get started.
+                  You haven&apos;t generated any proforma invoices yet. Navigate to the catalog to place an order.
                 </p>
                 <Link 
                   href="/portal/catalog"
@@ -150,65 +165,74 @@ export default async function OrderHistoryPage() {
                 <table className="w-full text-left text-sm border-collapse min-w-[600px]">
                   <thead>
                     <tr className="border-b border-border/60 text-xs font-bold text-muted-foreground pb-3">
-                      <th className="pb-3 w-32">Order ID</th>
-                      <th className="pb-3 w-32">Date Placed</th>
-                      <th className="pb-3 w-28 text-right">Items Quantity</th>
-                      <th className="pb-3 w-32 text-right">Fulfillment Total</th>
-                      <th className="pb-3 w-28 text-center">Fulfillment</th>
-                      <th className="pb-3 text-center w-52">Operational Actions</th>
+                      <th className="pb-3 w-36">Proforma No.</th>
+                      <th className="pb-3 w-32">Date Generated</th>
+                      <th className="pb-3 w-32 text-right">Items</th>
+                      <th className="pb-3 w-32 text-right">Grand Total</th>
+                      <th className="pb-3 w-28 text-center">Status</th>
+                      <th className="pb-3 text-center w-60">Actions</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border/40">
-                    {orders.map((order) => {
-                      const qty = order.orderItems.reduce((sum, it) => sum + it.quantity, 0);
+                    {proformas.map((pi) => {
+                      const qty = pi.order.orderItems.reduce((sum, it) => sum + it.quantity, 0);
+                      const isPending = pi.status === 'PENDING_PAYMENT';
+                      
                       return (
-                        <tr key={order.id} className="hover:bg-muted/5 transition-colors">
+                        <tr key={pi.id} className="hover:bg-muted/5 transition-colors">
                           <td className="py-4 font-bold font-mono text-xs text-foreground">
-                            #{order.id.slice(0, 8)}
+                            {pi.proformaNumber}
                           </td>
                           <td className="py-4 text-xs text-muted-foreground flex items-center gap-1.5 mt-0.5">
                             <Calendar size={12} />
-                            {new Date(order.createdAt).toLocaleDateString('en-IN', {
+                            {new Date(pi.createdAt).toLocaleDateString('en-IN', {
                               day: 'numeric',
                               month: 'short',
                               year: 'numeric'
                             })}
                           </td>
                           <td className="py-4 text-right font-semibold text-muted-foreground">
-                            {qty} tubs / units
+                            {qty} units
                           </td>
                           <td className="py-4 text-right font-extrabold text-foreground">
-                            ₹{Number(order.finalAmount).toFixed(2)}
+                            ₹{Number(pi.order.finalAmount).toFixed(2)}
                           </td>
                           <td className="py-4 text-center">
                             <span className={`px-2.5 py-0.5 rounded-full text-[9px] font-extrabold tracking-wider uppercase ${
-                              order.status === 'DELIVERED' ? 'bg-green-100 text-green-700 dark:bg-green-950/20 dark:text-green-400' :
-                              order.status === 'CANCELLED' ? 'bg-red-100 text-red-700 dark:bg-red-950/20 dark:text-red-400' :
-                              order.status === 'PENDING' ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-950/20 dark:text-yellow-400' :
-                              'bg-blue-100 text-blue-700 dark:bg-blue-950/20 dark:text-blue-400'
+                              pi.status === 'PAID' ? 'bg-green-100 text-green-700 dark:bg-green-950/20 dark:text-green-400' :
+                              pi.status === 'CANCELLED' ? 'bg-red-100 text-red-700 dark:bg-red-950/20 dark:text-red-400' :
+                              pi.status === 'EXPIRED' ? 'bg-slate-100 text-slate-700 dark:bg-slate-900 dark:text-slate-400' :
+                              'bg-yellow-100 text-yellow-700 dark:bg-yellow-950/20 dark:text-yellow-400'
                             }`}>
-                              {order.status}
+                              {pi.status.replace('_', ' ')}
                             </span>
                           </td>
                           <td className="py-4">
                             <div className="flex items-center justify-center gap-3">
                               <Link 
-                                href={`/portal/orders/${order.id}`}
+                                href={`/portal/proforma-invoices/${pi.id}`}
                                 className="px-2.5 py-1 bg-secondary text-secondary-foreground hover:text-brand-crimson font-bold rounded-lg text-[10px] flex items-center gap-1 cursor-pointer transition-colors"
                               >
-                                <Truck size={10} />
-                                Track Order
+                                <Eye size={10} />
+                                View
                               </Link>
-                              {order.paymentStatus === 'PAID' ? (
+                              
+                              <Link 
+                                href={`/portal/proforma-invoices/${pi.id}?print=true`}
+                                className="px-2.5 py-1 bg-brand-pink/50 hover:bg-brand-pink/80 text-brand-crimson font-bold rounded-lg text-[10px] flex items-center gap-1 cursor-pointer transition-colors"
+                              >
+                                <Printer size={10} />
+                                PDF
+                              </Link>
+                              
+                              {isPending && (
                                 <Link 
-                                  href={`/portal/orders/${order.id}/invoice`}
-                                  className="px-2.5 py-1 bg-brand-pink/50 hover:bg-brand-pink/80 text-brand-crimson font-bold rounded-lg text-[10px] flex items-center gap-1 cursor-pointer transition-colors"
+                                  href={`/portal/checkout?orderId=${pi.orderId}`}
+                                  className="px-2.5 py-1 bg-brand-crimson hover:bg-brand-crimson/95 text-white font-bold rounded-lg text-[10px] flex items-center gap-1 cursor-pointer transition-colors"
                                 >
-                                  <FileText size={10} />
-                                  Tax Invoice
+                                  <DollarSign size={10} />
+                                  Pay Now
                                 </Link>
-                              ) : (
-                                <span className="text-[10px] text-muted-foreground font-semibold">Unpaid</span>
                               )}
                             </div>
                           </td>

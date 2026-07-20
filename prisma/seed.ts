@@ -201,6 +201,16 @@ async function main() {
     }
   });
 
+  // Create Proforma Invoice for Order 1
+  await prisma.proformaInvoice.create({
+    data: {
+      orderId: order1.id,
+      proformaNumber: 'PI-2026-000001',
+      validUntil: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+      status: 'PAID'
+    }
+  });
+
   // Order 2: Dispatched & Unpaid (Outstanding balance)
   const order2 = await prisma.order.create({
     data: {
@@ -226,6 +236,34 @@ async function main() {
       orderId: order2.id,
       invoiceNumber: 'INV-2026-0002',
       gstDetails: 'CGST 9% + SGST 9%',
+    }
+  });
+
+  // Order 3: Pending Order with Proforma Invoice
+  const order3 = await prisma.order.create({
+    data: {
+      franchiseId: franchise.id,
+      status: 'PENDING',
+      totalAmount: 4200.00,
+      gstAmount: 756.00,
+      finalAmount: 4956.00,
+      paymentStatus: 'PENDING',
+    }
+  });
+
+  await prisma.orderItem.createMany({
+    data: [
+      { orderId: order3.id, productId: dbProducts[2].id, quantity: 20, priceAtPurchase: 180.00 },
+      { orderId: order3.id, productId: dbProducts[4].id, quantity: 4, priceAtPurchase: 150.00 },
+    ]
+  });
+
+  await prisma.proformaInvoice.create({
+    data: {
+      orderId: order3.id,
+      proformaNumber: 'PI-2026-000002',
+      validUntil: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+      status: 'PENDING_PAYMENT',
     }
   });
 
