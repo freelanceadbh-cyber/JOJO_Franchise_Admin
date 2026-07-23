@@ -2,14 +2,14 @@
 
 import React from 'react';
 
-export default function PrintButton({ children, className }: { children: React.ReactNode; className?: string }) {
+export default function PrintButton({ children, className }: { children?: React.ReactNode; className?: string }) {
   return (
     <button
       type="button"
       onClick={() => window.print()}
       className={className}
     >
-      {children}
+      {children || 'Print Document'}
     </button>
   );
 }

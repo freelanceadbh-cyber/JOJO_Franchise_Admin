@@ -1,3 +1,4 @@
+import LogoutButton from '@/components/logout-button';
 import Link from 'next/link';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
@@ -210,15 +211,7 @@ export default async function AdminDashboard() {
               <span className="text-[9px] text-muted-foreground uppercase tracking-widest font-bold">HQ Admin</span>
             </div>
           </div>
-          <form action={async () => {
-            'use server';
-            await signOut({ redirectTo: '/auth/signin' });
-          }}>
-            <button type="submit" className="w-full py-3 hover:bg-red-50 dark:hover:bg-red-950/20 text-red-600 font-bold rounded-2xl text-sm flex items-center justify-center gap-2 transition-all cursor-pointer">
-              <LogOut size={16} />
-              Log Out
-            </button>
-          </form>
+          <LogoutButton />
         </div>
       </aside>
 

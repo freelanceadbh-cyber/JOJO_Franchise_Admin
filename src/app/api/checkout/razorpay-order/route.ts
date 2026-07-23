@@ -74,7 +74,7 @@ export async function POST(req: Request) {
 
     // 2. Fetch real prices from database to calculate correct amount
     let subtotal = 0;
-    const itemsToCreate = [];
+    const itemsToCreate: { productId: string; quantity: number; priceAtPurchase: number }[] = [];
 
     for (const item of items) {
       const product = await prisma.product.findUnique({

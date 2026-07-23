@@ -1,6 +1,7 @@
 import React from 'react';
+import LogoutButton from '@/components/logout-button';
 import { prisma } from '@/lib/prisma';
-import { auth } from '@/auth';
+import { auth, signOut } from '@/auth';
 import { redirect } from 'next/navigation';
 import { 
   IceCream, 
@@ -88,15 +89,7 @@ export default async function AdminFranchisesPage() {
               <span className="text-[9px] text-muted-foreground uppercase tracking-widest font-bold">HQ Admin</span>
             </div>
           </div>
-          <form action="/api/auth/signout" method="POST" className="w-full">
-            <button 
-              type="submit"
-              className="w-full py-3 hover:bg-red-50 dark:hover:bg-red-950/20 text-red-600 font-bold rounded-2xl text-sm flex items-center justify-center gap-2 transition-all cursor-pointer border-0 bg-transparent"
-            >
-              <LogOut size={16} />
-              Log Out
-            </button>
-          </form>
+          <LogoutButton />
         </div>
       </aside>
 

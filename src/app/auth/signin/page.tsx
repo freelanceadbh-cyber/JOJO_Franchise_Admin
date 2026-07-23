@@ -1,9 +1,9 @@
 'use client';
 
-import React, { useState, Suspense, useEffect } from 'react';
-import { signIn } from 'next-auth/react';
+import React, { useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { IceCream, Loader2, ArrowRight, Lock, Mail } from 'lucide-react';
+import { authenticateUser } from './actions';
 
 function SignInForm() {
   const router = useRouter();
@@ -14,14 +14,6 @@ function SignInForm() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [csrfToken, setCsrfToken] = useState<string>('');
-
-  useEffect(() => {
-    fetch('/api/auth/csrf')
-      .then((r) => r.json())
-      .then((data) => setCsrfToken(data.csrfToken || ''))
-      .catch(() => setError('Failed to load security token. Please refresh.'));
-  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -29,30 +21,23 @@ function SignInForm() {
     setError(null);
 
     try {
-      const res = await signIn('credentials', {
-        email,
-        password,
-        csrfToken,
-        redirect: false,
-      });
+      const res = await authenticateUser(email, password);
 
-      if (res?.error) {
-        setError('Invalid credentials. Please verify your email and password.');
+      if (!res.success || res.error) {
+        setError(res.error || 'Invalid credentials. Please verify your email and password.');
         setLoading(false);
         return;
       }
 
-      const sessionRes = await fetch('/api/auth/session').then((r) => r.json());
-      
       let redirectUrl = callbackUrl;
-      if (callbackUrl === '/' && sessionRes?.user) {
-        redirectUrl = sessionRes.user.role === 'ADMIN' ? '/admin' : '/portal';
+      if (callbackUrl === '/' || callbackUrl.includes('/auth/signin')) {
+        redirectUrl = res.redirectUrl || '/portal';
       }
 
-      router.push(redirectUrl);
-      router.refresh();
-    } catch (err) {
-      setError('An error occurred during authentication. Please try again.');
+      window.location.href = redirectUrl;
+    } catch (err: any) {
+      console.error('[SignIn] exception:', err);
+      setError('An error occurred during sign in. Please try again.');
       setLoading(false);
     }
   };
@@ -114,11 +99,9 @@ function SignInForm() {
           </div>
         </div>
 
-        <input type="hidden" name="csrfToken" value={csrfToken} />
-
         <button
           type="submit"
-          disabled={loading || !csrfToken}
+          disabled={loading}
           className="w-full py-4 bg-brand-crimson hover:bg-brand-crimson/95 text-white font-bold rounded-2xl flex items-center justify-center gap-2 hover:gap-3 transition-all duration-300 shadow-lg shadow-brand-crimson/20 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {loading ? (

@@ -81,7 +81,7 @@ export async function updateProduct(id: string, data: {
 }
 
 // Toggle product availability (quick out-of-stock / back-in-stock)
-export async function toggleProductAvailability(id: string, isAvailable: boolean) {
+export async function toggleProductAvailability(id: string, isAvailable: boolean): Promise<void> {
   try {
     await prisma.product.update({
       where: { id },
@@ -91,11 +91,8 @@ export async function toggleProductAvailability(id: string, isAvailable: boolean
     revalidatePath('/admin/products');
     revalidatePath('/portal/catalog');
     revalidatePath('/admin');
-
-    return { success: true };
   } catch (error: any) {
     console.error('Failed to toggle product availability:', error);
-    return { success: false, error: error.message };
   }
 }
 

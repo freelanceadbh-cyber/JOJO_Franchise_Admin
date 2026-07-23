@@ -1,5 +1,9 @@
 'use client';
 
+import LogoutButton from '@/components/logout-button';
+
+import { signOut } from 'next-auth/react';
+
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -222,19 +226,7 @@ export default function CatalogClient({ initialProducts, userName, storeName, db
               <span className="text-[9px] text-muted-foreground uppercase tracking-widest font-bold">Franchise</span>
             </div>
           </div>
-          <button 
-            onClick={() => {
-              const form = document.createElement('form');
-              form.method = 'POST';
-              form.action = '/api/auth/signout';
-              document.body.appendChild(form);
-              form.submit();
-            }}
-            className="w-full py-3 hover:bg-red-50 dark:hover:bg-red-950/20 text-red-600 font-bold rounded-2xl text-sm flex items-center justify-center gap-2 transition-all cursor-pointer border-0 bg-transparent"
-          >
-            <LogOut size={16} />
-            Log Out
-          </button>
+          <LogoutButton />
         </div>
       </aside>
 
