@@ -26,7 +26,6 @@ export default async function NewFranchisePage() {
     const gstNumber = formData.get('gstNumber') as string;
     const address = formData.get('address') as string;
     const contactNumber = formData.get('contactNumber') as string;
-    const creditLimit = parseFloat(formData.get('creditLimit') as string);
 
     await createFranchise({
       name,
@@ -36,7 +35,6 @@ export default async function NewFranchisePage() {
       gstNumber,
       address,
       contactNumber,
-      creditLimit
     });
 
     redirect('/admin/franchises');
@@ -111,7 +109,7 @@ export default async function NewFranchisePage() {
               </div>
             </div>
 
-            <div className="px-4 py-2 text-[10px] uppercase tracking-widest text-muted-foreground font-black border-b border-border pb-1 mt-6">2. Store Logistics & Credit</div>
+            <div className="px-4 py-2 text-[10px] uppercase tracking-widest text-muted-foreground font-black border-b border-border pb-1 mt-6">2. Store Logistics Details</div>
 
             <div className="grid sm:grid-cols-3 gap-4">
               <div className="space-y-1.5 sm:col-span-1">
@@ -143,19 +141,6 @@ export default async function NewFranchisePage() {
                   required
                   name="contactNumber"
                   placeholder="e.g. +91 9876543210"
-                  className="w-full p-3 bg-background border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-crimson focus:border-transparent text-xs transition-all"
-                />
-              </div>
-            </div>
-
-            <div className="grid sm:grid-cols-2 gap-4">
-              <div className="space-y-1.5">
-                <label className="text-[10px] font-bold uppercase text-muted-foreground tracking-widest block">Allocated Credit Limit (INR)</label>
-                <input
-                  type="number"
-                  required
-                  name="creditLimit"
-                  placeholder="e.g. 150000.00"
                   className="w-full p-3 bg-background border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-crimson focus:border-transparent text-xs transition-all"
                 />
               </div>

@@ -119,11 +119,10 @@ function SignInForm() {
       </form>
 
       <div className="mt-8 text-center text-xs text-muted-foreground border-t border-border pt-6">
-        <p>Authorized personnel only. Demo accounts:</p>
-        <div className="mt-2 space-y-1 bg-muted/40 p-3 rounded-xl border border-border/50 text-left font-mono">
-          <div><span className="font-semibold">HQ Admin:</span> admin@jojo.com</div>
-          <div><span className="font-semibold">Franchise:</span> franchise1@jojo.com</div>
-          <div className="text-[10px] text-muted-foreground mt-1">Password for both: <span className="font-semibold">AdminPassword123 / FranchisePassword123</span></div>
+        <p className="font-medium text-foreground/80">Authorized Franchise & HQ Personnel Only</p>
+        <p className="mt-1 text-[11px]">Franchise owners sign in using credentials issued by HQ Admin during registration.</p>
+        <div className="mt-3 bg-muted/40 p-2.5 rounded-xl border border-border/50 text-left text-[11px] font-mono text-muted-foreground">
+          <div><span className="font-semibold text-foreground">Default HQ Admin:</span> admin@jojo.com</div>
         </div>
       </div>
     </div>

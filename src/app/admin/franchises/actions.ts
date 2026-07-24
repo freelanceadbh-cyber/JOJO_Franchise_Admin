@@ -13,7 +13,6 @@ export async function createFranchise(data: {
   gstNumber: string;
   address: string;
   contactNumber: string;
-  creditLimit: number;
 }) {
   try {
     const salt = await bcrypt.genSalt(10);
@@ -39,8 +38,6 @@ export async function createFranchise(data: {
           gstNumber: data.gstNumber,
           address: data.address,
           contactNumber: data.contactNumber,
-          creditLimit: data.creditLimit,
-          outstandingBalance: 0
         }
       });
 
@@ -57,14 +54,12 @@ export async function createFranchise(data: {
   }
 }
 
-// Update franchise credit limits, store names, and user account status
+// Update franchise specifications, store names, and user account status
 export async function updateFranchise(id: string, data: {
   storeName: string;
   gstNumber: string;
   address: string;
   contactNumber: string;
-  creditLimit: number;
-  outstandingBalance: number;
   status: string; // ACTIVE or INACTIVE
 }) {
   try {
@@ -86,8 +81,6 @@ export async function updateFranchise(id: string, data: {
           gstNumber: data.gstNumber,
           address: data.address,
           contactNumber: data.contactNumber,
-          creditLimit: data.creditLimit,
-          outstandingBalance: data.outstandingBalance
         }
       });
 

@@ -55,8 +55,6 @@ export default async function EditFranchisePage({ params }: EditFranchisePagePro
     const gstNumber = formData.get('gstNumber') as string;
     const address = formData.get('address') as string;
     const contactNumber = formData.get('contactNumber') as string;
-    const creditLimit = parseFloat(formData.get('creditLimit') as string);
-    const outstandingBalance = parseFloat(formData.get('outstandingBalance') as string);
     const status = formData.get('status') as string;
 
     await updateFranchise(id, {
@@ -64,8 +62,6 @@ export default async function EditFranchisePage({ params }: EditFranchisePagePro
       gstNumber,
       address,
       contactNumber,
-      creditLimit,
-      outstandingBalance,
       status
     });
 
@@ -168,31 +164,7 @@ export default async function EditFranchisePage({ params }: EditFranchisePagePro
               </div>
             </div>
 
-            <div className="grid sm:grid-cols-3 gap-4">
-              <div className="space-y-1.5">
-                <label className="text-[10px] font-bold uppercase text-muted-foreground tracking-widest block">Credit Limit (INR)</label>
-                <input
-                  type="number"
-                  required
-                  name="creditLimit"
-                  defaultValue={Number(franchise.creditLimit)}
-                  placeholder="e.g. 150000.00"
-                  className="w-full p-3 bg-background border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-crimson focus:border-transparent text-xs transition-all"
-                />
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="text-[10px] font-bold uppercase text-muted-foreground tracking-widest block">Outstanding Balance (INR)</label>
-                <input
-                  type="number"
-                  required
-                  name="outstandingBalance"
-                  defaultValue={Number(franchise.outstandingBalance)}
-                  placeholder="e.g. 12500.00"
-                  className="w-full p-3 bg-background border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-crimson focus:border-transparent text-xs transition-all font-mono"
-                />
-              </div>
-
+            <div className="grid sm:grid-cols-1 gap-4">
               <div className="space-y-1.5">
                 <label className="text-[10px] font-bold uppercase text-muted-foreground tracking-widest block">Outlet Status</label>
                 <select

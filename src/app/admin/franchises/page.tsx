@@ -135,24 +135,20 @@ export default async function AdminFranchisesPage() {
                   <thead>
                     <tr className="border-b border-border/60 text-xs font-bold text-muted-foreground pb-3">
                       <th className="pb-3">Franchise Store</th>
-                      <th className="pb-3 w-32">GST Registry</th>
-                      <th className="pb-3 w-36">Owner Contacts</th>
-                      <th className="pb-3 w-40 text-right">Credit Allocation</th>
-                      <th className="pb-3 w-36 text-right">Outstanding Bal</th>
+                      <th className="pb-3 w-40">GST Registry</th>
+                      <th className="pb-3 w-48">Owner Contacts</th>
+                      <th className="pb-3 w-36">Delivery Address</th>
                       <th className="pb-3 w-28 text-center">Account</th>
                       <th className="pb-3 text-center w-32">Operations</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border/40">
                     {franchises.map((f) => {
-                      const limit = Number(f.creditLimit);
-                      const balance = Number(f.outstandingBalance);
-                      const usage = Math.min((balance / (limit || 1)) * 100, 100);
                       return (
                         <tr key={f.id} className="hover:bg-muted/5 transition-colors">
                           <td className="py-4">
                             <span className="font-bold text-foreground block">{f.storeName}</span>
-                            <span className="text-[10px] text-muted-foreground block truncate max-w-xs mt-0.5">{f.address}</span>
+                            <span className="text-[10px] text-muted-foreground block truncate max-w-xs mt-0.5">{f.user.email}</span>
                           </td>
                           <td className="py-4 font-mono text-xs text-foreground font-semibold">
                             {f.gstNumber}
@@ -161,21 +157,8 @@ export default async function AdminFranchisesPage() {
                             <span className="font-bold block">{f.user.name}</span>
                             <span className="text-[10px] text-muted-foreground block">{f.contactNumber}</span>
                           </td>
-                          <td className="py-4 text-right font-extrabold text-foreground font-mono">
-                            ₹{limit.toLocaleString('en-IN')}
-                          </td>
-                          <td className="py-4 text-right font-mono font-bold">
-                            <span className={balance > limit ? 'text-red-500 font-extrabold' : 'text-foreground'}>
-                              ₹{balance.toLocaleString('en-IN')}
-                            </span>
-                            <div className="w-24 ml-auto mt-1 h-1 bg-muted rounded-full overflow-hidden">
-                              <div 
-                                className={`h-full rounded-full transition-all duration-300 ${
-                                  usage > 85 ? 'bg-red-500' : usage > 50 ? 'bg-yellow-500' : 'bg-brand-crimson'
-                                }`}
-                                style={{ width: `${usage}%` }}
-                              />
-                            </div>
+                          <td className="py-4 text-xs text-muted-foreground max-w-xs truncate">
+                            {f.address}
                           </td>
                           <td className="py-4 text-center">
                             <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[9px] font-extrabold tracking-wider ${

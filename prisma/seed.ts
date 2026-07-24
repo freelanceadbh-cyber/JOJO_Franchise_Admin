@@ -2,26 +2,16 @@ import { prisma } from '../src/lib/prisma';
 import bcrypt from 'bcryptjs';
 
 async function main() {
-  console.log('Starting seeding database...');
+  console.log('Starting production database initialization...');
 
-  await prisma.notification.deleteMany();
-  await prisma.message.deleteMany();
-  await prisma.invoice.deleteMany();
-  await prisma.payment.deleteMany();
-  await prisma.orderItem.deleteMany();
-  await prisma.order.deleteMany();
-  await prisma.product.deleteMany();
-  await prisma.franchise.deleteMany();
-  await prisma.user.deleteMany();
-
-  console.log('Cleared existing records.');
-
+  // 1. Ensure HQ Admin User
   const salt = await bcrypt.genSalt(10);
   const adminPasswordHash = await bcrypt.hash('AdminPassword123', salt);
-  const franchisePasswordHash = await bcrypt.hash('FranchisePassword123', salt);
 
-  const admin = await prisma.user.create({
-    data: {
+  const admin = await prisma.user.upsert({
+    where: { email: 'admin@jojo.com' },
+    update: {},
+    create: {
       email: 'admin@jojo.com',
       passwordHash: adminPasswordHash,
       name: 'JoJo Admin HQ',
@@ -29,32 +19,9 @@ async function main() {
       status: 'ACTIVE',
     },
   });
-  console.log(`Created Admin User: ${admin.email}`);
+  console.log(`Ensured Admin User: ${admin.email}`);
 
-  const franchiseUser = await prisma.user.create({
-    data: {
-      email: 'franchise1@jojo.com',
-      passwordHash: franchisePasswordHash,
-      name: 'Nandha Kumar',
-      role: 'FRANCHISE_OWNER',
-      status: 'ACTIVE',
-    },
-  });
-  console.log(`Created Franchise Owner User: ${franchiseUser.email}`);
-
-  const franchise = await prisma.franchise.create({
-    data: {
-      userId: franchiseUser.id,
-      storeName: 'JoJo Ice Creams - Chennai Central',
-      gstNumber: '33AABCJ1234F1Z5',
-      address: 'Shop No. 12, Express EA Mall, Royapettah, Chennai - 600014',
-      contactNumber: '+91 9876543210',
-      creditLimit: 150000.00,
-      outstandingBalance: 12500.00,
-    },
-  });
-  console.log(`Created Franchise Profile: ${franchise.storeName}`);
-
+  // 2. Ensure Official Product Catalog (39 products)
   const productsData = [
     { name: 'Vanilla', category: 'ICE_CREAM', subcategory: 'Regular', flavor: 'Vanilla', description: 'Classic vanilla (60g)', price: 49.00, stock: 200, isAvailable: true, imageUrl: '/images/flavors/Vannila.jpeg' },
     { name: 'Strawberry', category: 'ICE_CREAM', subcategory: 'Regular', flavor: 'Strawberry', description: 'Fresh strawberry flavor (60g)', price: 49.00, stock: 180, isAvailable: true, imageUrl: '/images/flavors/Strawberry.jpeg' },
@@ -103,153 +70,19 @@ async function main() {
     { name: 'Sugar Free Vanilla', category: 'ICE_CREAM', subcategory: 'Sugar Free', flavor: 'Sugar Free Vanilla', description: 'Pure vanilla with zero sugar (90g)', price: 79.00, stock: 100, isAvailable: true, imageUrl: '/images/flavors/sugar free vannila.jpeg' },
   ];
 
-  const dbProducts: any[] = [];
+  let createdCount = 0;
   for (const product of productsData) {
-    const createdProduct = await prisma.product.create({ data: product });
-    dbProducts.push(createdProduct);
-    console.log(`Created Product: ${createdProduct.name} (${createdProduct.category} - ${createdProduct.subcategory})`);
+    const existing = await prisma.product.findFirst({
+      where: { name: product.name, category: product.category }
+    });
+    if (!existing) {
+      await prisma.product.create({ data: product });
+      createdCount++;
+    }
   }
 
-  const order1 = await prisma.order.create({
-    data: {
-      franchiseId: franchise.id,
-      status: 'DELIVERED',
-      totalAmount: 1000.00,
-      gstAmount: 180.00,
-      finalAmount: 1180.00,
-      paymentStatus: 'PAID',
-    }
-  });
-
-  await prisma.orderItem.createMany({
-    data: [
-      { orderId: order1.id, productId: dbProducts[0].id, quantity: 2, priceAtPurchase: 49.00 },
-      { orderId: order1.id, productId: dbProducts[3].id, quantity: 2, priceAtPurchase: 99.00 },
-      { orderId: order1.id, productId: dbProducts[29].id, quantity: 1, priceAtPurchase: 125.00 },
-    ]
-  });
-
-  await prisma.invoice.create({
-    data: {
-      orderId: order1.id,
-      invoiceNumber: 'INV-2026-0001',
-      gstDetails: 'CGST 9% + SGST 9%',
-    }
-  });
-
-  await prisma.payment.create({
-    data: {
-      orderId: order1.id,
-      amount: 1180.00,
-      status: 'PAID',
-      paymentId: 'pay_P1A2B3C4D5',
-      razorpayOrderId: 'order_O1A2B3C4D5',
-      signature: 'sig_S1A2B3C4D5',
-    }
-  });
-
-  // Create Proforma Invoice for Order 1
-  await prisma.proformaInvoice.create({
-    data: {
-      orderId: order1.id,
-      proformaNumber: 'PI-2026-000001',
-      validUntil: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-      status: 'PAID'
-    }
-  });
-
-  // Order 2: Dispatched & Unpaid (Outstanding balance)
-  const order2 = await prisma.order.create({
-    data: {
-      franchiseId: franchise.id,
-      status: 'DISPATCHED',
-      totalAmount: 10593.22,
-      gstAmount: 1906.78,
-      finalAmount: 12500.00,
-      paymentStatus: 'PENDING',
-    }
-  });
-
-  await prisma.orderItem.createMany({
-    data: [
-      { orderId: order2.id, productId: dbProducts[0].id, quantity: 20, priceAtPurchase: 49.00 },
-      { orderId: order2.id, productId: dbProducts[1].id, quantity: 20, priceAtPurchase: 49.00 },
-      { orderId: order2.id, productId: dbProducts[29].id, quantity: 10, priceAtPurchase: 125.00 },
-    ]
-  });
-
-  await prisma.invoice.create({
-    data: {
-      orderId: order2.id,
-      invoiceNumber: 'INV-2026-0002',
-      gstDetails: 'CGST 9% + SGST 9%',
-    }
-  });
-
-  // Order 3: Pending Order with Proforma Invoice
-  const order3 = await prisma.order.create({
-    data: {
-      franchiseId: franchise.id,
-      status: 'PENDING',
-      totalAmount: 4200.00,
-      gstAmount: 756.00,
-      finalAmount: 4956.00,
-      paymentStatus: 'PENDING',
-    }
-  });
-
-  await prisma.orderItem.createMany({
-    data: [
-      { orderId: order3.id, productId: dbProducts[2].id, quantity: 20, priceAtPurchase: 180.00 },
-      { orderId: order3.id, productId: dbProducts[4].id, quantity: 4, priceAtPurchase: 150.00 },
-    ]
-  });
-
-  await prisma.proformaInvoice.create({
-    data: {
-      orderId: order3.id,
-      proformaNumber: 'PI-2026-000002',
-      validUntil: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-      status: 'PENDING_PAYMENT',
-    }
-  });
-
-  console.log(`Created Mock Orders for store.`);
-
-  const notificationsData = [
-    {
-      userId: franchiseUser.id,
-      type: 'ORDER',
-      message: 'Order #INV-2026-0002 has been packaged and dispatched. Awaiting delivery confirmation.',
-    },
-    {
-      userId: franchiseUser.id,
-      type: 'PAYMENT',
-      message: 'Invoice payment of ₹1,180.00 settled successfully for order #INV-2026-0001.',
-    },
-    {
-      userId: franchiseUser.id,
-      type: 'ORDER',
-      message: 'New store credit account verified. Allotted limit: ₹1,50,000.00.',
-    },
-    {
-      userId: franchiseUser.id,
-      type: 'SYSTEM',
-      message: 'NEW MENU ARRIVAL: Legacy ice cream scoops are now live! Outlets can place orders via the catalog.',
-    },
-    {
-      userId: franchiseUser.id,
-      type: 'SYSTEM',
-      message: 'FINANCE UPDATE: 18% GST invoice files for Q1 2026 have been generated. Download them under your Order History.',
-    },
-  ];
-
-  for (const n of notificationsData) {
-    await prisma.notification.create({ data: n });
-  }
-  console.log(`Created Mock Activities & System Announcements.`);
-
-  console.log('Seeding complete! Admin: admin@jojo.com / Franchise: franchise1@jojo.com (Passwords: AdminPassword123 / FranchisePassword123)');
+  console.log(`Product catalog sync complete. (${createdCount} new products added, ${productsData.length} total catalog items)`);
+  console.log('Seeding complete! Admin HQ is ready: admin@jojo.com (Password: AdminPassword123)');
 }
 
 main()

@@ -186,39 +186,37 @@ export default async function PortalDashboard() {
         {/* Dashboard Panels Grid */}
         <div className="p-6 space-y-6 max-w-7xl w-full mx-auto">
           
-          {/* Balance Cards & Credit meters */}
+          {/* Store Info & Quick Actions Grid */}
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
             <div className="p-6 rounded-3xl border border-border bg-card shadow-sm space-y-4">
               <div className="flex justify-between items-start">
-                <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Outstanding Balance</span>
+                <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Store Outlet Details</span>
                 <div className="w-10 h-10 rounded-2xl bg-brand-pink flex items-center justify-center text-brand-crimson">
                   <CreditCard size={20} />
                 </div>
               </div>
               <div>
-                <h3 className="text-3xl font-extrabold text-foreground">₹{Number(franchise.outstandingBalance).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</h3>
-                <p className="text-xs text-muted-foreground mt-1">Total credit utilized on dispatches</p>
+                <h3 className="text-xl font-extrabold text-foreground truncate">{franchise.storeName}</h3>
+                <p className="text-xs font-mono text-muted-foreground mt-1">GSTIN: {franchise.gstNumber}</p>
               </div>
             </div>
 
             <div className="p-6 rounded-3xl border border-border bg-card shadow-sm space-y-4">
               <div className="flex justify-between items-start">
-                <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Remaining Credit Limit</span>
+                <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Account Status</span>
                 <div className="w-10 h-10 rounded-2xl bg-green-100 dark:bg-green-950/20 flex items-center justify-center text-green-600 dark:text-green-400">
                   <ShieldCheck size={20} />
                 </div>
               </div>
               <div>
-                <h3 className="text-3xl font-extrabold text-foreground">
-                  ₹{Number(Number(franchise.creditLimit) - Number(franchise.outstandingBalance)).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
-                </h3>
-                <p className="text-xs text-muted-foreground mt-1">Limit: ₹{Number(franchise.creditLimit).toLocaleString('en-IN')}</p>
+                <h3 className="text-xl font-extrabold text-green-600 dark:text-green-400">Active Outlet</h3>
+                <p className="text-xs text-muted-foreground mt-1">Verified partner store access</p>
               </div>
             </div>
 
             <div className="p-6 rounded-3xl border border-border bg-card shadow-sm space-y-4 sm:col-span-2 lg:col-span-1 flex flex-col justify-between">
               <div className="flex justify-between items-start">
-                <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Replenish Inventory</span>
+                <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Replenish Stock</span>
                 <div className="w-10 h-10 rounded-2xl bg-brand-pink flex items-center justify-center text-brand-crimson">
                   <ShoppingBag size={20} />
                 </div>
@@ -228,8 +226,8 @@ export default async function PortalDashboard() {
                   href="/portal/catalog" 
                   className="w-full py-3.5 bg-brand-crimson hover:bg-brand-crimson/95 text-white font-bold rounded-2xl text-xs flex items-center justify-center gap-1.5 transition-colors shadow-md shadow-brand-crimson/15 cursor-pointer"
                 >
-                  <Plus size={14} className="stroke-[2.5]" />
-                  Place Bulk Order
+                  Order Wholesale Stock
+                  <ArrowRight size={14} />
                 </Link>
               </div>
             </div>

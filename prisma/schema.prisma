@@ -35,8 +35,6 @@ model Franchise {
   gstNumber          String
   address            String
   contactNumber      String
-  creditLimit        Decimal    @default(0)
-  outstandingBalance Decimal    @default(0)
   
   orders             Order[]
 }

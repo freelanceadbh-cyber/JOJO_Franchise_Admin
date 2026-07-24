@@ -23,6 +23,9 @@ export default async function AdminMessagesPage() {
     include: {
       sender: {
         include: { franchise: true }
+      },
+      recipient: {
+        include: { franchise: true }
       }
     },
     orderBy: { createdAt: 'desc' }
@@ -32,6 +35,9 @@ export default async function AdminMessagesPage() {
   const sentMessages = await prisma.message.findMany({
     where: { senderId: adminId },
     include: {
+      sender: {
+        include: { franchise: true }
+      },
       recipient: {
         include: { franchise: true }
       }
@@ -44,19 +50,19 @@ export default async function AdminMessagesPage() {
     include: { user: true }
   });
 
-  // Serialize helper
+  // Safe serialization helper
   const serializeMessage = (m: any) => ({
     id: m.id,
     senderId: m.senderId,
-    senderName: m.sender.name + ' (' + (m.sender.franchise?.storeName || 'HQ Admin') + ')',
-    senderEmail: m.sender.email,
+    senderName: m.sender?.name ? (m.sender.name + ' (' + (m.sender.franchise?.storeName || 'HQ Admin') + ')') : 'HQ Admin',
+    senderEmail: m.sender?.email || '',
     recipientId: m.recipientId,
-    recipientName: m.recipient.name + ' (' + (m.recipient.franchise?.storeName || 'HQ Admin') + ')',
-    recipientEmail: m.recipient.email,
-    subject: m.subject,
-    body: m.body,
-    isRead: m.isRead,
-    createdAt: m.createdAt.toISOString()
+    recipientName: m.recipient?.name ? (m.recipient.name + ' (' + (m.recipient.franchise?.storeName || 'HQ Admin') + ')') : 'HQ Admin',
+    recipientEmail: m.recipient?.email || '',
+    subject: m.subject || '',
+    body: m.body || '',
+    isRead: Boolean(m.isRead),
+    createdAt: m.createdAt ? m.createdAt.toISOString() : new Date().toISOString()
   });
 
   return (

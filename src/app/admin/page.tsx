@@ -17,6 +17,7 @@ import {
   Package,
   Percent,
   ShoppingBag,
+  TrendingDown,
   TrendingUp,
   Truck,
   UserCheck,
@@ -47,20 +48,6 @@ async function updateStatus(orderId: string, newStatus: string) {
   }
 }
 
-// Server Action to adjust outstanding balance of a franchise
-async function clearFranchiseBalance(franchiseId: string) {
-  'use server';
-  try {
-    await prisma.franchise.update({
-      where: { id: franchiseId },
-      data: { outstandingBalance: 0 }
-    });
-    revalidatePath('/admin');
-  } catch (error) {
-    console.error('Failed to clear franchise balance:', error);
-  }
-}
-
 async function getAdminData() {
   try {
     const paidOrders = await prisma.order.findMany({
@@ -69,16 +56,59 @@ async function getAdminData() {
     });
     const totalRevenue = paidOrders.reduce((sum, order) => sum + Number(order.finalAmount), 0);
 
+    // Real Month-over-Month Revenue Growth calculation
+    const now = new Date();
+    const startOfCurrentMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    const endOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59, 999);
+
+    const currentMonthPaidOrders = await prisma.order.findMany({
+      where: {
+        paymentStatus: 'PAID',
+        createdAt: { gte: startOfCurrentMonth }
+      },
+      select: { finalAmount: true }
+    });
+    const currentMonthRevenue = currentMonthPaidOrders.reduce((sum, o) => sum + Number(o.finalAmount), 0);
+
+    const lastMonthPaidOrders = await prisma.order.findMany({
+      where: {
+        paymentStatus: 'PAID',
+        createdAt: { gte: startOfLastMonth, lte: endOfLastMonth }
+      },
+      select: { finalAmount: true }
+    });
+    const lastMonthRevenue = lastMonthPaidOrders.reduce((sum, o) => sum + Number(o.finalAmount), 0);
+
+    let revenueGrowth = {
+      text: 'Lifetime settled payouts',
+      isPositive: true
+    };
+
+    if (lastMonthRevenue > 0) {
+      const growthPct = ((currentMonthRevenue - lastMonthRevenue) / lastMonthRevenue) * 100;
+      revenueGrowth = {
+        text: `${growthPct >= 0 ? '+' : ''}${growthPct.toFixed(1)}% from last month`,
+        isPositive: growthPct >= 0
+      };
+    } else if (currentMonthRevenue > 0) {
+      revenueGrowth = {
+        text: 'Initial growth this month',
+        isPositive: true
+      };
+    }
+
     const pendingOrdersCount = await prisma.order.count({
       where: { status: 'PENDING' }
     });
 
     const activeFranchiseCount = await prisma.franchise.count();
 
+    const productCatalogCount = await prisma.product.count();
+
     const franchisesData = await prisma.franchise.findMany({
       include: { user: true }
     });
-    const totalOutstanding = franchisesData.reduce((sum, f) => sum + Number(f.outstandingBalance), 0);
 
     const orders = await prisma.order.findMany({
       orderBy: { createdAt: 'desc' },
@@ -90,15 +120,6 @@ async function getAdminData() {
       }
     });
 
-    const monthlySales = [
-      { month: 'Jan', sales: 45000 },
-      { month: 'Feb', sales: 58000 },
-      { month: 'Mar', sales: 62000 },
-      { month: 'Apr', sales: 78000 },
-      { month: 'May', sales: 95000 },
-      { month: 'Jun', sales: 120000 },
-    ];
-
     const categoriesCount = {
       ICE_CREAM: await prisma.product.count({ where: { category: 'ICE_CREAM' } }),
       MILKSHAKE: await prisma.product.count({ where: { category: 'MILKSHAKE' } }),
@@ -107,31 +128,24 @@ async function getAdminData() {
 
     return {
       totalRevenue,
+      revenueGrowth,
       pendingOrdersCount,
       activeFranchiseCount,
-      totalOutstanding,
+      productCatalogCount,
       orders,
       franchises: franchisesData,
-      monthlySales,
       categoriesCount
     };
   } catch (error) {
     console.error('Database connection failed. Using fallback data.', error);
     return {
       totalRevenue: 0,
+      revenueGrowth: { text: 'Lifetime settled payouts', isPositive: true },
       pendingOrdersCount: 0,
       activeFranchiseCount: 0,
-      totalOutstanding: 0,
+      productCatalogCount: 0,
       orders: [],
       franchises: [],
-      monthlySales: [
-        { month: 'Jan', sales: 0 },
-        { month: 'Feb', sales: 0 },
-        { month: 'Mar', sales: 0 },
-        { month: 'Apr', sales: 0 },
-        { month: 'May', sales: 0 },
-        { month: 'Jun', sales: 0 },
-      ],
       categoriesCount: { ICE_CREAM: 0, MILKSHAKE: 0, EXOTIC_CUP: 0 }
     };
   }
@@ -150,17 +164,14 @@ export default async function AdminDashboard() {
 
   const {
     totalRevenue,
+    revenueGrowth,
     pendingOrdersCount,
     activeFranchiseCount,
-    totalOutstanding,
+    productCatalogCount,
     orders,
     franchises,
-    monthlySales,
     categoriesCount
   } = await getAdminData();
-
-  // Max value for SVG line chart scaling
-  const maxSale = Math.max(...monthlySales.map(m => m.sales));
 
   return (
     <div className="min-h-screen flex bg-[#FFFDF9] dark:bg-[#0E0709] font-sans">
@@ -249,8 +260,12 @@ export default async function AdminDashboard() {
               <div>
                 <h3 className="text-2xl font-black text-foreground">₹{totalRevenue.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</h3>
                 <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
-                  <TrendingUp size={12} className="text-green-600" />
-                  +12.4% from last month
+                  {revenueGrowth.isPositive ? (
+                    <TrendingUp size={12} className="text-green-600" />
+                  ) : (
+                    <TrendingDown size={12} className="text-red-500" />
+                  )}
+                  {revenueGrowth.text}
                 </p>
               </div>
             </div>
@@ -270,14 +285,14 @@ export default async function AdminDashboard() {
 
             <div className="p-6 rounded-3xl border border-border bg-card shadow-sm space-y-4 hover:scale-[1.01] transition-transform">
               <div className="flex justify-between items-start">
-                <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Outstanding Net Balance</span>
-                <div className="w-9 h-9 rounded-xl bg-yellow-50 dark:bg-yellow-950/20 flex items-center justify-center text-yellow-600 dark:text-yellow-400">
-                  <Clock size={18} />
+                <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Catalog Products</span>
+                <div className="w-9 h-9 rounded-xl bg-purple-50 dark:bg-purple-950/20 flex items-center justify-center text-purple-600 dark:text-purple-400">
+                  <IceCream size={18} />
                 </div>
               </div>
               <div>
-                <h3 className="text-2xl font-black text-foreground">₹{totalOutstanding.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</h3>
-                <p className="text-xs text-muted-foreground mt-1">Pending bank settlement</p>
+                <h3 className="text-2xl font-black text-foreground">{productCatalogCount} Items</h3>
+                <p className="text-xs text-muted-foreground mt-1">Available in ordering catalog</p>
               </div>
             </div>
 
@@ -295,127 +310,42 @@ export default async function AdminDashboard() {
             </div>
           </div>
 
-          {/* Charts Row */}
-          <div className="grid md:grid-cols-3 gap-6">
-            {/* Sales Trend Line Chart */}
-            <div className="md:col-span-2 p-6 rounded-3xl border border-border bg-card shadow-sm space-y-6">
-              <div className="flex justify-between items-center">
-                <div>
-                  <h3 className="text-sm font-bold text-foreground">Revenue Expansion Trend</h3>
-                  <p className="text-[10px] text-muted-foreground">Historical B2B wholesale order volumes (INR)</p>
-                </div>
-                <span className="text-xs font-bold text-brand-crimson px-2.5 py-1 bg-brand-pink rounded-full">
-                  Monthly Aggregates
-                </span>
+          {/* Category Distribution & Quick Status Row */}
+          <div className="p-6 rounded-3xl border border-border bg-card shadow-sm space-y-6">
+            <div className="flex justify-between items-center">
+              <div>
+                <h3 className="text-md font-bold text-foreground">Menu Category Spread</h3>
+                <p className="text-xs text-muted-foreground">Product catalog division and inventory representation.</p>
               </div>
-
-              {/* Custom SVG Line Chart */}
-              <div className="w-full h-56 relative pt-4">
-                <svg className="w-full h-full" viewBox="0 0 500 200" preserveAspectRatio="none">
-                  <defs>
-                    <linearGradient id="chartGradient" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#DC143C" stopOpacity="0.25" />
-                      <stop offset="100%" stopColor="#DC143C" stopOpacity="0.0" />
-                    </linearGradient>
-                  </defs>
-                  
-                  {/* Grid lines */}
-                  <line x1="0" y1="50" x2="500" y2="50" stroke="#f1e5e7" strokeWidth="0.5" strokeDasharray="4" />
-                  <line x1="0" y1="100" x2="500" y2="100" stroke="#f1e5e7" strokeWidth="0.5" strokeDasharray="4" />
-                  <line x1="0" y1="150" x2="500" y2="150" stroke="#f1e5e7" strokeWidth="0.5" strokeDasharray="4" />
-
-                  {/* SVG Area */}
-                  <path
-                    d={`
-                      M 0 200
-                      L 0 ${200 - (monthlySales[0].sales / maxSale) * 150}
-                      L 100 ${200 - (monthlySales[1].sales / maxSale) * 150}
-                      L 200 ${200 - (monthlySales[2].sales / maxSale) * 150}
-                      L 300 ${200 - (monthlySales[3].sales / maxSale) * 150}
-                      L 400 ${200 - (monthlySales[4].sales / maxSale) * 150}
-                      L 500 ${200 - (monthlySales[5].sales / maxSale) * 150}
-                      L 500 200 Z
-                    `}
-                    fill="url(#chartGradient)"
-                  />
-
-                  {/* SVG Line */}
-                  <path
-                    d={`
-                      M 0 ${200 - (monthlySales[0].sales / maxSale) * 150}
-                      L 100 ${200 - (monthlySales[1].sales / maxSale) * 150}
-                      L 200 ${200 - (monthlySales[2].sales / maxSale) * 150}
-                      L 300 ${200 - (monthlySales[3].sales / maxSale) * 150}
-                      L 400 ${200 - (monthlySales[4].sales / maxSale) * 150}
-                      L 500 ${200 - (monthlySales[5].sales / maxSale) * 150}
-                    `}
-                    fill="none"
-                    stroke="#DC143C"
-                    strokeWidth="3.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-
-                  {/* SVG Points */}
-                  {monthlySales.map((m, idx) => (
-                    <circle
-                      key={idx}
-                      cx={idx * 100}
-                      cy={200 - (m.sales / maxSale) * 150}
-                      r="5"
-                      fill="#FFFFFF"
-                      stroke="#DC143C"
-                      strokeWidth="2.5"
-                    />
-                  ))}
-                </svg>
-
-                {/* X Axis Labels */}
-                <div className="flex justify-between text-[10px] font-bold text-muted-foreground pt-3 border-t border-border mt-2">
-                  {monthlySales.map((m, idx) => (
-                    <div key={idx} className="w-12 text-center">{m.month} (₹{(m.sales / 1000).toFixed(0)}k)</div>
-                  ))}
-                </div>
-              </div>
+              <Link href="/admin/products" className="text-xs font-bold text-brand-crimson hover:underline">
+                Manage Catalog
+              </Link>
             </div>
 
-            {/* Category Distribution Bar Chart */}
-            <div className="p-6 rounded-3xl border border-border bg-card shadow-sm space-y-6 flex flex-col justify-between">
-              <div>
-                <h3 className="text-sm font-bold text-foreground">Menu Category Spread</h3>
-                <p className="text-[10px] text-muted-foreground">Product catalog division</p>
-              </div>
-
-              {/* Custom SVG Bar Chart */}
-              <div className="space-y-4 py-2">
-                {[
-                  { label: 'Ice Creams', count: categoriesCount.ICE_CREAM, color: 'bg-brand-crimson' },
-                  { label: 'Milkshakes', count: categoriesCount.MILKSHAKE, color: 'bg-brand-maroon' },
-                  { label: 'Exotic Cups', count: categoriesCount.EXOTIC_CUP, color: 'bg-[#FF8A9F]' }
-                ].map((item, idx) => {
-                  const total = categoriesCount.ICE_CREAM + categoriesCount.MILKSHAKE + categoriesCount.EXOTIC_CUP || 1;
-                  const percent = (item.count / total) * 100;
-                  return (
-                    <div key={idx} className="space-y-1.5">
-                      <div className="flex justify-between text-xs font-bold text-foreground">
-                        <span>{item.label}</span>
-                        <span>{item.count} items ({percent.toFixed(0)}%)</span>
-                      </div>
-                      <div className="w-full h-2.5 bg-muted rounded-full overflow-hidden">
-                        <div 
-                          className={`h-full ${item.color} rounded-full transition-all duration-500`}
-                          style={{ width: `${percent}%` }}
-                        />
-                      </div>
+            {/* Custom Bar Chart */}
+            <div className="grid md:grid-cols-3 gap-6 py-2">
+              {[
+                { label: 'Ice Creams', count: categoriesCount.ICE_CREAM, color: 'bg-brand-crimson' },
+                { label: 'Milkshakes', count: categoriesCount.MILKSHAKE, color: 'bg-brand-maroon' },
+                { label: 'Exotic Cups', count: categoriesCount.EXOTIC_CUP, color: 'bg-[#FF8A9F]' }
+              ].map((item, idx) => {
+                const total = categoriesCount.ICE_CREAM + categoriesCount.MILKSHAKE + categoriesCount.EXOTIC_CUP || 1;
+                const percent = (item.count / total) * 100;
+                return (
+                  <div key={idx} className="p-4 bg-muted/20 border border-border/50 rounded-2xl space-y-2">
+                    <div className="flex justify-between text-xs font-bold text-foreground">
+                      <span>{item.label}</span>
+                      <span>{item.count} items ({percent.toFixed(0)}%)</span>
                     </div>
-                  );
-                })}
-              </div>
-
-              <div className="p-4 bg-muted/40 rounded-2xl border border-border/50 text-[10px] text-muted-foreground flex items-center gap-2">
-                <Percent size={14} className="text-brand-crimson flex-shrink-0" />
-                <span>Adjust inventory categories and listings in the Product Catalog section.</span>
-              </div>
+                    <div className="w-full h-3 bg-muted rounded-full overflow-hidden">
+                      <div 
+                        className={`h-full ${item.color} rounded-full transition-all duration-500`}
+                        style={{ width: `${percent}%` }}
+                      />
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
 
@@ -525,60 +455,35 @@ export default async function AdminDashboard() {
               )}
             </div>
 
-            {/* Franchise Outlet Balance Registry */}
+            {/* Registered Franchise Outlets Directory */}
             <div className="p-6 rounded-3xl border border-border bg-card shadow-sm space-y-6">
-              <div>
-                <h3 className="text-md font-bold text-foreground">Franchise Credit Accounts</h3>
-                <p className="text-xs text-muted-foreground">Manage limits, balances, and clear settlements.</p>
+              <div className="flex justify-between items-center">
+                <div>
+                  <h3 className="text-md font-bold text-foreground">Registered Franchise Outlets</h3>
+                  <p className="text-xs text-muted-foreground">Active partner stores registered on portal.</p>
+                </div>
+                <Link href="/admin/franchises" className="text-xs font-bold text-brand-crimson hover:underline">
+                  View All
+                </Link>
               </div>
 
               {franchises.length === 0 ? (
                 <div className="py-8 text-center space-y-1">
                   <UserCheck size={28} className="text-muted-foreground mx-auto opacity-30" />
-                  <p className="text-xs font-semibold text-muted-foreground">No franchises accounts registered</p>
+                  <p className="text-xs font-semibold text-muted-foreground">No franchise outlets registered</p>
                 </div>
               ) : (
-                <div className="space-y-6">
+                <div className="space-y-4">
                   {franchises.map((f) => {
-                    const limitVal = Number(f.creditLimit) || 1;
-                    const balanceVal = Number(f.outstandingBalance);
-                    const usagePercent = Math.min((balanceVal / limitVal) * 100, 100);
                     return (
-                      <div key={f.id} className="space-y-2.5 border-b border-border/40 pb-4 last:border-b-0 last:pb-0">
-                        <div className="flex justify-between items-start gap-2">
-                          <div className="min-w-0">
-                            <h4 className="text-xs font-extrabold text-foreground truncate">{f.storeName}</h4>
-                            <p className="text-[10px] text-muted-foreground truncate">{f.user.name} • {f.contactNumber}</p>
-                          </div>
-                          
-                          {balanceVal > 0 && (
-                            <form action={clearFranchiseBalance.bind(null, f.id)}>
-                              <button type="submit" className="px-2 py-1 bg-muted hover:bg-green-100 hover:text-green-700 font-bold rounded-lg text-[9px] cursor-pointer text-muted-foreground transition-colors">
-                                Clear Balance
-                              </button>
-                            </form>
-                          )}
+                      <div key={f.id} className="flex justify-between items-center border-b border-border/40 pb-3 last:border-b-0 last:pb-0">
+                        <div className="min-w-0">
+                          <h4 className="text-xs font-extrabold text-foreground truncate">{f.storeName}</h4>
+                          <p className="text-[10px] text-muted-foreground truncate">{f.user.name} • {f.contactNumber}</p>
                         </div>
-
-                        {/* Credit Limit Usage Gauge */}
-                        <div className="space-y-1">
-                          <div className="flex justify-between text-[10px] font-bold">
-                            <span className="text-muted-foreground">Credit Line Limit: ₹{(limitVal / 1000).toFixed(0)}k</span>
-                            <span className={balanceVal > limitVal ? 'text-red-500' : 'text-foreground'}>
-                              Due: ₹{balanceVal.toFixed(2)}
-                            </span>
-                          </div>
-                          <div className="w-full h-1.5 bg-muted rounded-full overflow-hidden">
-                            <div 
-                              className={`h-full rounded-full transition-all duration-300 ${
-                                usagePercent > 80 ? 'bg-red-500' :
-                                usagePercent > 50 ? 'bg-yellow-500' :
-                                'bg-brand-crimson'
-                              }`}
-                              style={{ width: `${usagePercent}%` }}
-                            />
-                          </div>
-                        </div>
+                        <span className="px-2.5 py-0.5 rounded-full text-[9px] font-bold bg-green-100 dark:bg-green-950/40 text-green-700 dark:text-green-300">
+                          Active
+                        </span>
                       </div>
                     );
                   })}

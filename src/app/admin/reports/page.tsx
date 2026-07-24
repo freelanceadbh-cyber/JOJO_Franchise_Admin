@@ -36,27 +36,23 @@ async function getReportData() {
   // 2. Average Order Value
   const aov = paidOrders.length > 0 ? totalRevenue / paidOrders.length : 0;
 
-  // 3. Fetch outstanding receivables
+  // 3. Fetch franchise directory
   const franchises = await prisma.franchise.findMany({
     include: { user: true }
   });
   
-  const totalOutstanding = franchises.reduce((sum, f) => sum + Number(f.outstandingBalance), 0);
-  const totalCreditLimit = franchises.reduce((sum, f) => sum + Number(f.creditLimit), 0);
+  const activeOutletsCount = franchises.length;
+  const totalOrdersCount = await prisma.order.count();
 
-  // Rank franchises by credit utilization ratio (outstanding balance / credit limit)
-  const branchRiskRegistry = franchises.map(f => {
-    const limit = Number(f.creditLimit) || 1;
-    const balance = Number(f.outstandingBalance);
-    const utilization = (balance / limit) * 100;
+  const branchDirectory = franchises.map(f => {
     return {
       storeName: f.storeName,
       owner: f.user.name,
-      limit,
-      balance,
-      utilization
+      email: f.user.email,
+      contact: f.contactNumber,
+      gst: f.gstNumber
     };
-  }).sort((a, b) => b.utilization - a.utilization); // High risk first
+  });
 
   // Category statistics
   const productDistribution = {
@@ -70,9 +66,9 @@ async function getReportData() {
     totalGST,
     totalTaxable,
     aov,
-    totalOutstanding,
-    totalCreditLimit,
-    branchRiskRegistry,
+    activeOutletsCount,
+    totalOrdersCount,
+    branchDirectory,
     productDistribution
   };
 }
@@ -91,11 +87,10 @@ export default async function AdminReportsPage() {
   const {
     totalRevenue,
     totalGST,
-    totalTaxable,
     aov,
-    totalOutstanding,
-    totalCreditLimit,
-    branchRiskRegistry,
+    activeOutletsCount,
+    totalOrdersCount,
+    branchDirectory,
     productDistribution
   } = await getReportData();
 
@@ -136,7 +131,7 @@ export default async function AdminReportsPage() {
             <MessageSquare size={18} />
             Store Support
           </Link>
-          <Link href="/admin/reports" className="flex items-center gap-3 px-4 py-3 bg-secondary text-secondary-foreground font-bold rounded-2xl text-sm transition-all">
+          <Link href="/admin/reports" className="flex items-center gap-3 bg-secondary text-secondary-foreground font-bold rounded-2xl text-sm transition-all">
             <BarChart3 size={18} />
             Filing Reports
           </Link>
@@ -219,15 +214,15 @@ export default async function AdminReportsPage() {
 
             <div className="p-6 rounded-3xl border border-border bg-card shadow-sm space-y-4">
               <div className="flex justify-between items-start">
-                <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Outstanding Receivables</span>
-                <div className="w-8 h-8 rounded-lg bg-yellow-50 dark:bg-yellow-950/20 flex items-center justify-center text-yellow-600 dark:text-yellow-400">
-                  <TrendingDown size={16} />
+                <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider font-extrabold">Active Outlets & Orders</span>
+                <div className="w-8 h-8 rounded-lg bg-purple-50 dark:bg-purple-950/20 flex items-center justify-center text-purple-600 dark:text-purple-400">
+                  <Users size={16} />
                 </div>
               </div>
               <div>
-                <h3 className="text-2xl font-black text-foreground">₹{totalOutstanding.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</h3>
+                <h3 className="text-2xl font-black text-foreground">{activeOutletsCount} Outlets</h3>
                 <p className="text-[10px] text-muted-foreground mt-1">
-                  Credit Limit utilized: {((totalOutstanding / (totalCreditLimit || 1)) * 100).toFixed(1)}%
+                  {totalOrdersCount} Total Orders Placed
                 </p>
               </div>
             </div>
@@ -235,14 +230,14 @@ export default async function AdminReportsPage() {
 
           <div className="grid lg:grid-cols-3 gap-6">
             
-            {/* Left: Outlet Credit utilization Risk table (2 cols) */}
+            {/* Left: Outlet Directory table (2 cols) */}
             <div className="lg:col-span-2 p-6 rounded-3xl border border-border bg-card shadow-sm space-y-6">
               <div>
-                <h3 className="text-sm font-bold text-foreground">Outlet Credit Utilization & Risk Audit</h3>
-                <p className="text-xs text-muted-foreground">List of active franchise stores ranked by credit line usage ratio (High to Low).</p>
+                <h3 className="text-sm font-bold text-foreground">Registered Franchise Store Registry</h3>
+                <p className="text-xs text-muted-foreground">Detailed summary of active franchise stores and corporate contacts.</p>
               </div>
 
-              {branchRiskRegistry.length === 0 ? (
+              {branchDirectory.length === 0 ? (
                 <p className="text-xs text-muted-foreground">No branch data available.</p>
               ) : (
                 <div className="overflow-x-auto">
@@ -250,52 +245,28 @@ export default async function AdminReportsPage() {
                     <thead>
                       <tr className="border-b border-border/60 font-bold text-muted-foreground pb-2">
                         <th className="pb-2">Franchise Store</th>
-                        <th className="pb-2 w-32 text-right">Credit Limit</th>
-                        <th className="pb-2 w-32 text-right">Outstanding Bal</th>
-                        <th className="pb-2 w-40 text-center">Credit Utilized</th>
-                        <th className="pb-2 text-center w-20">Risk</th>
+                        <th className="pb-2 w-40">GST Registry</th>
+                        <th className="pb-2 w-44">Contact Number</th>
+                        <th className="pb-2 text-center w-20">Status</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-border/40">
-                      {branchRiskRegistry.map((b, idx) => (
+                      {branchDirectory.map((b, idx) => (
                         <tr key={idx} className="hover:bg-muted/5 transition-colors">
                           <td className="py-3 font-semibold text-slate-800 dark:text-foreground">
                             {b.storeName}
-                            <span className="block text-[10px] text-muted-foreground font-normal mt-0.5">Owner: {b.owner}</span>
+                            <span className="block text-[10px] text-muted-foreground font-normal mt-0.5">Owner: {b.owner} ({b.email})</span>
                           </td>
-                          <td className="py-3 text-right font-mono text-foreground font-bold">
-                            ₹{b.limit.toLocaleString('en-IN')}
+                          <td className="py-3 font-mono text-foreground font-bold">
+                            {b.gst}
                           </td>
-                          <td className="py-3 text-right font-mono text-slate-500 font-bold">
-                            ₹{b.balance.toLocaleString('en-IN')}
-                          </td>
-                          <td className="py-3">
-                            <div className="flex items-center gap-2 justify-center pl-4">
-                              <div className="w-20 h-1.5 bg-muted rounded-full overflow-hidden flex-shrink-0">
-                                <div 
-                                  className={`h-full rounded-full transition-all duration-300 ${
-                                    b.utilization > 80 ? 'bg-red-500' : b.utilization > 50 ? 'bg-yellow-500' : 'bg-brand-crimson'
-                                  }`}
-                                  style={{ width: `${b.utilization}%` }}
-                                />
-                              </div>
-                              <span className="font-bold font-mono text-[10px] w-8">{b.utilization.toFixed(0)}%</span>
-                            </div>
+                          <td className="py-3 font-mono text-slate-500 font-bold">
+                            {b.contact}
                           </td>
                           <td className="py-3 text-center">
-                            {b.utilization > 80 ? (
-                              <span className="text-[9px] bg-red-100 text-red-700 font-extrabold px-1.5 py-0.5 rounded-md flex items-center gap-0.5 justify-center">
-                                <AlertTriangle size={10} /> Critical
-                              </span>
-                            ) : b.utilization > 50 ? (
-                              <span className="text-[9px] bg-yellow-100 text-yellow-700 font-bold px-1.5 py-0.5 rounded-md justify-center block">
-                                Moderate
-                              </span>
-                            ) : (
-                              <span className="text-[9px] bg-green-100 text-green-700 font-semibold px-1.5 py-0.5 rounded-md justify-center block">
-                                Safe
-                              </span>
-                            )}
+                            <span className="text-[9px] bg-green-100 text-green-700 font-semibold px-2 py-0.5 rounded-full justify-center inline-block">
+                              Active
+                            </span>
                           </td>
                         </tr>
                       ))}

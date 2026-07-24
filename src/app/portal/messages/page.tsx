@@ -21,7 +21,8 @@ export default async function MessagesPage() {
   const receivedMessages = await prisma.message.findMany({
     where: { recipientId: userId },
     include: {
-      sender: true
+      sender: true,
+      recipient: true
     },
     orderBy: { createdAt: 'desc' }
   });
@@ -30,6 +31,7 @@ export default async function MessagesPage() {
   const sentMessages = await prisma.message.findMany({
     where: { senderId: userId },
     include: {
+      sender: true,
       recipient: true
     },
     orderBy: { createdAt: 'desc' }
@@ -50,25 +52,21 @@ export default async function MessagesPage() {
   const serializeMessage = (m: any) => ({
     id: m.id,
     senderId: m.senderId,
-    senderName: m.sender.name,
-    senderEmail: m.sender.email,
+    senderName: m.sender?.name || (m.sender?.role === 'ADMIN' ? 'HQ Admin' : 'Franchise Partner'),
+    senderEmail: m.sender?.email || '',
     recipientId: m.recipientId,
-    recipientName: m.recipient?.name || 'HQ Admin',
+    recipientName: m.recipient?.name || (m.recipient?.role === 'ADMIN' ? 'HQ Admin' : 'Franchise Partner'),
     recipientEmail: m.recipient?.email || '',
-    subject: m.subject,
-    body: m.body,
-    isRead: m.isRead,
-    createdAt: m.createdAt.toISOString()
+    subject: m.subject || '',
+    body: m.body || '',
+    isRead: Boolean(m.isRead),
+    createdAt: m.createdAt ? m.createdAt.toISOString() : new Date().toISOString()
   });
 
   return (
     <MessagesClient
       inbox={receivedMessages.map(serializeMessage)}
-      sent={sentMessages.map((m: any) => ({
-        ...serializeMessage(m),
-        recipientName: m.recipient.name,
-        recipientEmail: m.recipient.email
-      }))}
+      sent={sentMessages.map(serializeMessage)}
       admins={admins}
       currentUserId={userId}
       storeName={franchise?.storeName || 'Outlet'}
