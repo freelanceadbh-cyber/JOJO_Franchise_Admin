@@ -19,6 +19,7 @@ import {
   Percent
 } from 'lucide-react';
 import Link from 'next/link';
+import AdminSidebar from '@/components/admin-sidebar';
 import { deleteFranchise } from './actions';
 
 export default async function AdminFranchisesPage() {
@@ -42,63 +43,14 @@ export default async function AdminFranchisesPage() {
 
   return (
     <div className="min-h-screen flex bg-[#FFFDF9] dark:bg-[#0E0709] font-sans">
-      {/* ===== SIDEBAR ===== */}
-      <aside className="w-64 border-r border-border bg-card hidden lg:flex flex-col flex-shrink-0">
-        <div className="p-6 border-b border-border flex items-center gap-2">
-          <div className="w-9 h-9 rounded-full bg-brand-pink flex items-center justify-center text-brand-crimson">
-            <IceCream size={20} className="stroke-[2.5]" />
-          </div>
-          <span className="font-extrabold tracking-tight text-md uppercase text-foreground">
-            JoJo <span className="text-brand-crimson">HQ</span>
-          </span>
-        </div>
-
-        <nav className="p-4 flex-1 space-y-1">
-          <Link href="/admin" className="flex items-center gap-3 px-4 py-3 text-muted-foreground hover:text-brand-crimson hover:bg-brand-pink/30 rounded-2xl text-sm transition-all">
-            <Layers size={18} />
-            Operations Room
-          </Link>
-          <div className="px-4 py-2 text-[10px] uppercase tracking-widest text-muted-foreground font-bold">Catalog Management</div>
-          <Link href="/admin/products" className="flex items-center gap-3 px-4 py-3 text-muted-foreground hover:text-brand-crimson hover:bg-brand-pink/30 rounded-2xl text-sm transition-all">
-            <IceCream size={18} />
-            Ice Cream Flavors
-          </Link>
-          <div className="px-4 py-2 text-[10px] uppercase tracking-widest text-muted-foreground font-bold">Store Logistics</div>
-          <Link href="/admin/franchises" className="flex items-center gap-3 px-4 py-3 bg-secondary text-secondary-foreground font-bold rounded-2xl text-sm transition-all">
-            <Users size={18} />
-            Franchise Registry
-          </Link>
-          <Link href="/admin/orders" className="flex items-center gap-3 px-4 py-3 text-muted-foreground hover:text-brand-crimson hover:bg-brand-pink/30 rounded-2xl text-sm transition-all">
-            <ShoppingBag size={18} />
-            Full Order Queue
-          </Link>
-          <div className="px-4 py-2 text-[10px] uppercase tracking-widest text-muted-foreground font-bold">HQ Operations</div>
-          <Link href="/admin/messages" className="flex items-center gap-3 px-4 py-3 text-muted-foreground hover:text-brand-crimson hover:bg-brand-pink/30 rounded-2xl text-sm transition-all">
-            <MessageSquare size={18} />
-            Store Support
-          </Link>
-        </nav>
-
-        <div className="p-4 border-t border-border">
-          <div className="p-3 bg-muted/40 rounded-2xl border border-border/50 flex items-center gap-3 mb-3">
-            <div className="w-8 h-8 rounded-full bg-brand-crimson text-white flex items-center justify-center text-xs font-bold shadow-inner">
-              {session.user.name?.[0] || 'A'}
-            </div>
-            <div className="min-w-0">
-              <p className="text-xs font-bold text-foreground truncate">{session.user.name}</p>
-              <span className="text-[9px] text-muted-foreground uppercase tracking-widest font-bold">HQ Admin</span>
-            </div>
-          </div>
-          <LogoutButton />
-        </div>
-      </aside>
+      <AdminSidebar user={session.user} />
 
       {/* ===== MAIN CONTENT ===== */}
       <main className="flex-1 flex flex-col min-w-0 overflow-y-auto">
-        <header className="h-20 border-b border-border px-6 flex items-center justify-between bg-card flex-shrink-0">
+        <header className="h-16 border-b border-border px-6 flex items-center justify-between bg-card flex-shrink-0">
           <div>
-            <h1 className="text-lg font-bold text-foreground">Franchise Outlet Accounts</h1>
-            <p className="text-xs text-muted-foreground">Manage active partners, GST details, and lines of credit.</p>
+            <h1 className="text-md font-bold text-foreground tracking-tight">Franchise Outlet Accounts</h1>
+            <p className="text-[11px] text-muted-foreground">Logistics management & B2B outlet accounts registry.</p>
           </div>
           <div className="flex gap-2">
             <Link 

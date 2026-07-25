@@ -1,19 +1,25 @@
 import type { Metadata } from 'next';
-import { Poppins, League_Spartan } from 'next/font/google';
+import { Inter, Plus_Jakarta_Sans, JetBrains_Mono } from 'next/font/google';
 import { AuthProvider } from '@/components/providers/session-provider';
 import { ToastThemeProvider } from '@/components/providers/toast-theme-provider';
 import './globals.css';
 
-const poppins = Poppins({
-  variable: '--font-poppins',
+const inter = Inter({
+  variable: '--font-inter',
   subsets: ['latin'],
-  weight: ['400', '500', '600', '700', '800'],
+  display: 'swap',
 });
 
-const leagueSpartan = League_Spartan({
-  variable: '--font-spartan',
+const plusJakarta = Plus_Jakarta_Sans({
+  variable: '--font-jakarta',
   subsets: ['latin'],
-  weight: ['400', '500', '600', '700', '800'],
+  display: 'swap',
+});
+
+const jetbrainsMono = JetBrains_Mono({
+  variable: '--font-mono',
+  subsets: ['latin'],
+  display: 'swap',
 });
 
 export const metadata: Metadata = {
@@ -29,7 +35,7 @@ export default function RootLayout({
   return (
     <html lang="en" className="h-full" suppressHydrationWarning>
       <body
-        className={`${poppins.variable} ${leagueSpartan.variable} font-sans h-full bg-background text-foreground antialiased`}
+        className={`${inter.variable} ${plusJakarta.variable} ${jetbrainsMono.variable} font-sans h-full bg-background text-foreground antialiased`}
       >
         <ToastThemeProvider>
           <AuthProvider>{children}</AuthProvider>

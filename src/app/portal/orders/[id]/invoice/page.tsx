@@ -7,7 +7,8 @@ import {
   CheckCircle,
   FileText,
   ShieldAlert,
-  IceCream
+  IceCream,
+  Printer
 } from 'lucide-react';
 import Link from 'next/link';
 import PrintButton from '@/components/print-button';
@@ -50,7 +51,7 @@ export default async function InvoicePage({ params }: InvoicePageProps) {
           <p className="text-sm text-muted-foreground">
             We could not locate a settled tax invoice for this order record. Please verify that payment was fully cleared.
           </p>
-          <Link href="/portal" className="inline-block px-5 py-2.5 bg-brand-crimson text-white font-bold rounded-2xl text-xs transition-colors">
+          <Link href={session.user.role === 'ADMIN' ? '/admin/orders' : '/portal'} className="inline-block px-5 py-2.5 bg-brand-crimson text-white font-bold rounded-2xl text-xs transition-colors">
             Return to Dashboard
           </Link>
         </div>
@@ -82,14 +83,17 @@ export default async function InvoicePage({ params }: InvoicePageProps) {
       {/* Action Header Panel - Hidden on print */}
       <div className="max-w-3xl mx-auto mb-6 flex items-center justify-between no-print bg-card border border-border p-4 rounded-2xl shadow-xs">
         <Link 
-          href="/portal/orders" 
+          href={session.user.role === 'ADMIN' ? '/admin/orders' : '/portal/orders'} 
           className="flex items-center gap-1.5 font-bold text-muted-foreground hover:text-brand-crimson transition-colors"
         >
           <ArrowLeft size={16} />
-          Back to Shipments
+          {session.user.role === 'ADMIN' ? 'Back to Admin Orders' : 'Back to Shipments'}
         </Link>
         <div className="flex gap-2">
-          <PrintButton className="px-5 py-2.5 bg-brand-crimson hover:bg-brand-crimson/95 text-white font-bold rounded-xl text-xs flex items-center gap-1.5 transition-all shadow-md shadow-brand-crimson/15 cursor-pointer border-0" />
+          <PrintButton className="px-5 py-2.5 bg-brand-crimson hover:bg-brand-crimson/95 text-white font-bold rounded-xl text-xs flex items-center gap-1.5 transition-all shadow-md shadow-brand-crimson/15 cursor-pointer border-0">
+            <Printer size={15} />
+            <span>Print / Save A4 PDF</span>
+          </PrintButton>
         </div>
       </div>
 

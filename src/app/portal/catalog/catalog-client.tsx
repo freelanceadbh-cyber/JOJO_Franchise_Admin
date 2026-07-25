@@ -1,6 +1,7 @@
 'use client';
 
 import LogoutButton from '@/components/logout-button';
+import PortalSidebar from '@/components/portal-sidebar';
 
 import { signOut } from 'next-auth/react';
 
@@ -181,54 +182,7 @@ export default function CatalogClient({ initialProducts, userName, storeName, db
 
   return (
     <div className="min-h-screen flex bg-[#FFFDF9] dark:bg-[#0E0709] font-sans relative overflow-x-hidden">
-      
-      {/* ===== SIDEBAR ===== */}
-      <aside className="w-64 border-r border-border bg-card hidden lg:flex flex-col flex-shrink-0">
-        <div className="p-6 border-b border-border flex items-center gap-2">
-          <div className="w-9 h-9 rounded-full bg-brand-pink flex items-center justify-center text-brand-crimson">
-            <IceCream size={20} className="stroke-[2.5]" />
-          </div>
-          <span className="font-extrabold tracking-tight text-md uppercase text-foreground">
-            JoJo <span className="text-brand-crimson">Portal</span>
-          </span>
-        </div>
-
-        <nav className="p-4 flex-1 space-y-1">
-          <Link href="/portal" className="flex items-center gap-3 px-4 py-3 text-muted-foreground hover:text-brand-crimson hover:bg-brand-pink/30 rounded-2xl text-sm transition-all">
-            <CreditCard size={18} />
-            Dashboard
-          </Link>
-          <Link href="/portal/catalog" className="flex items-center gap-3 px-4 py-3 bg-secondary text-secondary-foreground font-bold rounded-2xl text-sm transition-all">
-            <ShoppingBag size={18} />
-            Order Catalog
-          </Link>
-          <Link href="/portal/orders" className="flex items-center gap-3 px-4 py-3 text-muted-foreground hover:text-brand-crimson hover:bg-brand-pink/30 rounded-2xl text-sm transition-all">
-            <History size={18} />
-            Order History
-          </Link>
-          <Link href="/portal/proforma-invoices" className="flex items-center gap-3 px-4 py-3 text-muted-foreground hover:text-brand-crimson hover:bg-brand-pink/30 rounded-2xl text-sm transition-all">
-            <FileText size={18} />
-            Proforma Invoices
-          </Link>
-          <Link href="/portal/messages" className="flex items-center gap-3 px-4 py-3 text-muted-foreground hover:text-brand-crimson hover:bg-brand-pink/30 rounded-2xl text-sm transition-all">
-            <MessageSquare size={18} />
-            HQ Messages
-          </Link>
-        </nav>
-
-        <div className="p-4 border-t border-border">
-          <div className="p-3 bg-muted/40 rounded-2xl border border-border/50 flex items-center gap-3 mb-3">
-            <div className="w-8 h-8 rounded-full bg-brand-crimson text-white flex items-center justify-center text-xs font-bold shadow-inner">
-              {userName[0]}
-            </div>
-            <div className="min-w-0">
-              <p className="text-xs font-bold text-foreground truncate">{userName}</p>
-              <span className="text-[9px] text-muted-foreground uppercase tracking-widest font-bold">Franchise</span>
-            </div>
-          </div>
-          <LogoutButton />
-        </div>
-      </aside>
+      <PortalSidebar user={{ name: userName }} />
 
       {/* ===== MAIN CONTENT ===== */}
       <main className="flex-1 flex flex-col min-w-0 overflow-y-auto">

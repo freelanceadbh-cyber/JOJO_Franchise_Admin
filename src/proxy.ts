@@ -21,6 +21,11 @@ export default async function proxy(request: NextRequest) {
     }
 
     if (isOnPortal && session.user.role !== 'FRANCHISE_OWNER') {
+      // Allow ADMIN to view tax invoice and proforma invoice pages under /portal
+      const isInvoicePage = pathname.includes('/invoice') || pathname.includes('/proforma-invoices');
+      if (session.user.role === 'ADMIN' && isInvoicePage) {
+        return NextResponse.next();
+      }
       return NextResponse.redirect(new URL('/admin', request.url));
     }
 
