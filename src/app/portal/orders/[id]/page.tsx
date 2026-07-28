@@ -126,15 +126,15 @@ export default async function OrderTrackingPage({ params }: TrackingPageProps) {
       </header>
 
       {/* Main Grid */}
-      <div className="p-6 max-w-5xl mx-auto grid md:grid-cols-12 gap-8 items-start mt-4">
+      <div className="p-6 max-w-5xl mx-auto grid md:grid-cols-12 gap-10 items-start mt-4">
         
         {/* Left: Timeline Feed (8 cols) */}
-        <div className="md:col-span-8 p-6 rounded-3xl border border-border bg-card shadow-sm space-y-8">
-          <div>
-            <span className="text-[9px] bg-brand-pink text-brand-crimson font-black px-2.5 py-0.5 rounded-md uppercase tracking-wider">
+        <div className="md:col-span-8 space-y-6">
+          <div className="border-b border-border/60 pb-3">
+            <span className="text-[9px] bg-brand-pink text-brand-crimson font-black px-2.5 py-0.5 rounded-full uppercase tracking-wider">
               Real-time Logistics Feed
             </span>
-            <h2 className="text-lg font-bold text-foreground mt-2">Fulfillment Milestones</h2>
+            <h2 className="text-xl font-bold text-foreground mt-2 font-heading">Fulfillment Milestones</h2>
             <p className="text-xs text-muted-foreground">Detailed progression of your cold-chain stock replenishment.</p>
           </div>
 
@@ -180,8 +180,8 @@ export default async function OrderTrackingPage({ params }: TrackingPageProps) {
         {/* Right: Order details & address preview (4 cols) */}
         <div className="md:col-span-4 space-y-6">
           
-          {/* Metadata Card */}
-          <div className="p-6 rounded-3xl border border-border bg-card shadow-sm space-y-5">
+          {/* Metadata Section */}
+          <div className="space-y-4 border-b border-border/60 pb-6">
             <h3 className="text-xs font-bold uppercase tracking-wider text-foreground">Shipment Summary</h3>
             
             <div className="space-y-3.5 text-xs">
@@ -212,7 +212,7 @@ export default async function OrderTrackingPage({ params }: TrackingPageProps) {
             {order.invoice && isPaid ? (
               <Link 
                 href={`/portal/orders/${order.id}/invoice`}
-                className="w-full py-3 bg-brand-pink/50 hover:bg-brand-pink/80 text-brand-crimson font-bold rounded-2xl text-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer border-0"
+                className="w-full py-2.5 bg-brand-pink/50 hover:bg-brand-pink/80 text-brand-crimson font-bold rounded-xl text-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer border-0"
               >
                 <FileText size={14} />
                 Download Tax Invoice
@@ -224,11 +224,11 @@ export default async function OrderTrackingPage({ params }: TrackingPageProps) {
             )}
           </div>
 
-          {/* Delivery Coordinates Preview */}
-          <div className="p-6 rounded-3xl border border-border bg-card shadow-sm space-y-4">
+          {/* Delivery Coordinates Section */}
+          <div className="space-y-3">
             <h3 className="text-xs font-bold uppercase tracking-wider text-foreground">Delivery Coordinates</h3>
             
-            <div className="space-y-4 text-xs">
+            <div className="space-y-3.5 text-xs">
               <div className="flex items-start gap-2.5">
                 <MapPin size={16} className="text-brand-crimson mt-0.5 flex-shrink-0" />
                 <div>
@@ -238,7 +238,7 @@ export default async function OrderTrackingPage({ params }: TrackingPageProps) {
                 </div>
               </div>
 
-              <div className="flex items-start gap-2.5 border-t border-border/50 pt-4">
+              <div className="flex items-start gap-2.5 border-t border-border/50 pt-3.5">
                 <Package size={16} className="text-brand-crimson mt-0.5 flex-shrink-0" />
                 <div>
                   <span className="text-[9px] font-bold uppercase text-muted-foreground block">Insulated Box Count</span>

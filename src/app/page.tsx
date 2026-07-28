@@ -179,8 +179,8 @@ export default async function Home() {
             </p>
           </div>
           <div className="grid md:grid-cols-3 gap-8">
-            <div className="p-8 rounded-3xl border border-border/80 bg-background/50 hover:border-brand-crimson/20 hover:bg-background transition-all duration-300 flex flex-col gap-4">
-              <div className="w-12 h-12 rounded-2xl bg-brand-pink flex items-center justify-center text-brand-crimson">
+            <div className="tile-card p-8 rounded-3xl flex flex-col gap-4 group">
+              <div className="w-12 h-12 rounded-2xl bg-brand-pink flex items-center justify-center text-brand-crimson group-hover:scale-110 transition-transform duration-300">
                 <ShoppingBag size={20} className="stroke-[2.5]" />
               </div>
               <h3 className="text-xl font-bold text-foreground">Streamlined Ordering</h3>
@@ -188,8 +188,8 @@ export default async function Home() {
                 Add products from the categories, request customizations, check inventory states, and queue orders in seconds.
               </p>
             </div>
-            <div className="p-8 rounded-3xl border border-border/80 bg-background/50 hover:border-brand-crimson/20 hover:bg-background transition-all duration-300 flex flex-col gap-4">
-              <div className="w-12 h-12 rounded-2xl bg-brand-pink flex items-center justify-center text-brand-crimson">
+            <div className="tile-card p-8 rounded-3xl flex flex-col gap-4 group">
+              <div className="w-12 h-12 rounded-2xl bg-brand-pink flex items-center justify-center text-brand-crimson group-hover:scale-110 transition-transform duration-300">
                 <ShieldCheck size={20} className="stroke-[2.5]" />
               </div>
               <h3 className="text-xl font-bold text-foreground">Secure Payments</h3>
@@ -197,8 +197,8 @@ export default async function Home() {
                 Pay on-the-fly using the integrated Razorpay checkout gateway. Support credit, debit, netbanking, and UPI.
               </p>
             </div>
-            <div className="p-8 rounded-3xl border border-border/80 bg-background/50 hover:border-brand-crimson/20 hover:bg-background transition-all duration-300 flex flex-col gap-4">
-              <div className="w-12 h-12 rounded-2xl bg-brand-pink flex items-center justify-center text-brand-crimson">
+            <div className="tile-card p-8 rounded-3xl flex flex-col gap-4 group">
+              <div className="w-12 h-12 rounded-2xl bg-brand-pink flex items-center justify-center text-brand-crimson group-hover:scale-110 transition-transform duration-300">
                 <FileText size={20} className="stroke-[2.5]" />
               </div>
               <h3 className="text-xl font-bold text-foreground">Instant Invoices</h3>
@@ -235,23 +235,23 @@ export default async function Home() {
             {showcaseProducts.map((product, idx) => (
               <div 
                 key={idx} 
-                className="group rounded-[32px] border border-border p-6 bg-card hover:shadow-xl hover:border-brand-crimson/15 transition-all duration-300 flex flex-col justify-between"
+                className="tile-card rounded-[32px] p-6 flex flex-col justify-between group"
               >
                 <div>
-                  <div className="w-full h-48 rounded-[24px] bg-brand-pink/50 flex items-center justify-center text-brand-crimson mb-6 group-hover:scale-[1.02] transition-transform duration-300">
-                    <IceCream size={48} className="stroke-[1.5]" />
+                  <div className="tile-media w-full h-48 flex items-center justify-center text-brand-crimson mb-6">
+                    <IceCream size={54} className="stroke-[1.5] group-hover:scale-110 transition-transform duration-500" />
                   </div>
-                  <div className="text-xs font-bold text-brand-crimson uppercase tracking-wider">{product.category}</div>
-                  <h3 className="text-xl font-bold text-foreground mt-1 mb-2">{product.name}</h3>
+                  <div className="text-xs font-black text-brand-crimson uppercase tracking-wider">{product.category}</div>
+                  <h3 className="text-xl font-bold text-foreground mt-1 mb-2 group-hover:text-brand-crimson transition-colors">{product.name}</h3>
                   <p className="text-xs text-muted-foreground leading-relaxed">{product.description}</p>
                 </div>
                 <div className="flex items-center justify-between border-t border-border/60 pt-4 mt-6">
-                  <span className="text-lg font-extrabold text-brand-crimson">
+                  <span className="text-lg font-black text-brand-crimson">
                     ₹{product.price.toFixed(2)}
                   </span>
                   <Link 
                     href="/auth/signin" 
-                    className="px-4 py-2 bg-secondary hover:bg-brand-crimson hover:text-white text-secondary-foreground font-bold rounded-xl text-xs flex items-center gap-1 transition-all duration-300"
+                    className="px-5 py-2.5 bg-brand-crimson hover:bg-brand-crimson/95 text-white font-bold rounded-2xl text-xs flex items-center gap-1.5 transition-all duration-300 shadow-md shadow-brand-crimson/20 hover:scale-[1.03]"
                   >
                     Order Bulk
                   </Link>

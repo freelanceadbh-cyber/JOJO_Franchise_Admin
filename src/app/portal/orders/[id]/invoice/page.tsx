@@ -78,10 +78,10 @@ export default async function InvoicePage({ params }: InvoicePageProps) {
   const grandTotal = Number(order.finalAmount);
 
   return (
-    <div className="min-h-screen bg-muted/20 dark:bg-[#080405] py-10 px-4 font-sans text-xs">
+    <div className="min-h-screen bg-background py-8 px-4 font-sans text-xs">
       
       {/* Action Header Panel - Hidden on print */}
-      <div className="max-w-3xl mx-auto mb-6 flex items-center justify-between no-print bg-card border border-border p-4 rounded-2xl shadow-xs">
+      <div className="max-w-3xl mx-auto mb-6 flex items-center justify-between no-print py-2">
         <Link 
           href={session.user.role === 'ADMIN' ? '/admin/orders' : '/portal/orders'} 
           className="flex items-center gap-1.5 font-bold text-muted-foreground hover:text-brand-crimson transition-colors"
@@ -90,15 +90,15 @@ export default async function InvoicePage({ params }: InvoicePageProps) {
           {session.user.role === 'ADMIN' ? 'Back to Admin Orders' : 'Back to Shipments'}
         </Link>
         <div className="flex gap-2">
-          <PrintButton className="px-5 py-2.5 bg-brand-crimson hover:bg-brand-crimson/95 text-white font-bold rounded-xl text-xs flex items-center gap-1.5 transition-all shadow-md shadow-brand-crimson/15 cursor-pointer border-0">
+          <PrintButton className="px-5 py-2 bg-brand-crimson hover:bg-brand-crimson/95 text-white font-bold rounded-xl text-xs flex items-center gap-1.5 transition-all shadow-xs cursor-pointer border-0">
             <Printer size={15} />
             <span>Print / Save A4 PDF</span>
           </PrintButton>
         </div>
       </div>
 
-      {/* Printable Invoice Container */}
-      <div className="max-w-3xl mx-auto bg-white text-slate-800 p-8 sm:p-12 border border-slate-200 rounded-3xl shadow-sm relative print-container print:border-none print:shadow-none print:p-0">
+      {/* Printable Invoice Container - Flat & Borderless Document */}
+      <div className="max-w-3xl mx-auto bg-white text-slate-800 p-8 sm:p-12 relative print-container print:p-0">
         
         {/* Invoice Top Ribbon Brand */}
         <div className="flex justify-between items-start gap-4 border-b border-slate-200 pb-8">

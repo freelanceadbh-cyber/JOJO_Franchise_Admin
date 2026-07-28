@@ -275,69 +275,73 @@ export default function CatalogClient({ initialProducts, userName, storeName, db
                       return (
                         <div 
                           key={p.id} 
-                          className="group rounded-3xl border border-border p-5 bg-card hover:shadow-lg hover:border-brand-crimson/15 transition-all flex flex-col justify-between"
+                          className="tile-card rounded-3xl p-5 flex flex-col justify-between group"
                         >
                           <div>
-                            <div className="w-full h-40 rounded-2xl bg-brand-pink/50 flex items-center justify-center text-brand-crimson mb-4 relative overflow-hidden group-hover:scale-[1.01] transition-all">
+                            <div className="tile-media w-full h-44 flex items-center justify-center text-brand-crimson mb-4 relative overflow-hidden">
                               {p.imageUrl ? (
-                                <img src={p.imageUrl} alt={p.name} className="w-full h-full object-cover rounded-2xl" />
+                                <img src={p.imageUrl} alt={p.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                               ) : (
-                                <IceCream size={48} className="stroke-[1.5]" />
+                                <IceCream size={52} className="stroke-[1.5] group-hover:scale-110 transition-transform duration-500" />
                               )}
-                              <span className="absolute top-3 left-3 px-2.5 py-0.5 bg-white/95 dark:bg-card/95 text-brand-crimson font-bold rounded-lg text-[9px] uppercase tracking-wider shadow-xs">
+                              <span className="absolute top-3 left-3 px-3 py-1 bg-white/90 dark:bg-card/90 backdrop-blur-md text-brand-crimson font-extrabold rounded-full text-[9px] uppercase tracking-wider border border-brand-crimson/15 shadow-sm">
                                 {p.subcategory}
                               </span>
                               
                               {p.stock <= 0 ? (
-                                <span className="absolute bottom-3 right-3 px-2 py-0.5 bg-red-600 text-white font-bold rounded text-[8px] uppercase tracking-wide">
+                                <span className="absolute bottom-3 right-3 px-2.5 py-1 bg-red-600/90 backdrop-blur-md text-white font-extrabold rounded-full text-[8px] uppercase tracking-wider shadow-sm">
                                   Out of Stock
                                 </span>
                               ) : p.stock < 10 ? (
-                                <span className="absolute bottom-3 right-3 px-2 py-0.5 bg-yellow-500 text-white font-bold rounded text-[8px] uppercase tracking-wide">
+                                <span className="absolute bottom-3 right-3 px-2.5 py-1 bg-amber-500/90 backdrop-blur-md text-white font-extrabold rounded-full text-[8px] uppercase tracking-wider shadow-sm">
                                   Low Stock ({p.stock})
                                 </span>
                               ) : null}
                             </div>
 
                             <div className="flex justify-between items-start gap-2">
-                              <h3 className="text-sm font-bold text-foreground line-clamp-1">{p.name}</h3>
+                              <h3 className="text-base font-bold text-foreground line-clamp-1 group-hover:text-brand-crimson transition-colors">{p.name}</h3>
                               <button 
                                 onClick={() => setSelectedProduct(p)}
-                                className="p-1 hover:bg-muted rounded-md text-muted-foreground hover:text-brand-crimson transition-all cursor-pointer border-0 bg-transparent"
+                                className="p-1.5 hover:bg-brand-pink/50 dark:hover:bg-brand-crimson/20 rounded-xl text-muted-foreground hover:text-brand-crimson transition-all cursor-pointer border-0 bg-transparent"
+                                title="Quick View"
                               >
                                 <Eye size={16} />
                               </button>
                             </div>
-                            <span className="text-[10px] text-muted-foreground font-semibold block mt-0.5">Flavor: {p.flavor}</span>
-                            <p className="text-xs text-muted-foreground leading-relaxed mt-2 line-clamp-2">{p.description}</p>
+                            <span className="text-[11px] text-muted-foreground/90 font-medium block mt-0.5">Flavor: <strong className="text-foreground/90 font-semibold">{p.flavor}</strong></span>
+                            <p className="text-xs text-muted-foreground/80 leading-relaxed mt-2 line-clamp-2">{p.description}</p>
                           </div>
 
-                          <div className="flex items-center justify-between border-t border-border/40 pt-4 mt-5">
-                            <span className="text-md font-extrabold text-brand-crimson">
-                              ₹{p.price.toFixed(2)}
-                            </span>
+                          <div className="flex items-center justify-between border-t border-border/50 pt-4 mt-5">
+                            <div className="flex flex-col">
+                              <span className="text-[9px] uppercase tracking-widest font-extrabold text-muted-foreground">Price</span>
+                              <span className="text-lg font-black text-brand-crimson tracking-tight">
+                                ₹{p.price.toFixed(2)}
+                              </span>
+                            </div>
 
                             {p.stock <= 0 ? (
                               <button 
                                 disabled 
-                                className="px-3.5 py-2 bg-muted text-muted-foreground font-bold rounded-xl text-xs cursor-not-allowed border-0"
+                                className="px-4 py-2 bg-muted text-muted-foreground font-bold rounded-xl text-xs cursor-not-allowed border-0"
                               >
                                 Unavailable
                               </button>
                             ) : inCart ? (
-                              <div className="flex items-center border border-brand-crimson/30 rounded-xl bg-secondary overflow-hidden">
+                              <div className="flex items-center border border-brand-crimson/30 rounded-2xl bg-brand-pink/40 dark:bg-brand-crimson/10 overflow-hidden shadow-xs">
                                 <button 
                                   onClick={() => decrementQuantity(p.id)}
-                                  className="px-2 py-2 hover:bg-brand-crimson/10 text-brand-crimson cursor-pointer border-0 bg-transparent flex items-center justify-center"
+                                  className="px-2.5 py-2 hover:bg-brand-crimson/15 text-brand-crimson cursor-pointer border-0 bg-transparent flex items-center justify-center transition-colors"
                                 >
                                   <Minus size={12} className="stroke-[2.5]" />
                                 </button>
-                                <span className="px-2 text-xs font-black text-secondary-foreground min-w-[20px] text-center">
+                                <span className="px-2.5 text-xs font-black text-brand-crimson min-w-[20px] text-center">
                                   {inCart.quantity}
                                 </span>
                                 <button 
                                   onClick={() => addToCart(p)}
-                                  className="px-2 py-2 hover:bg-brand-crimson/10 text-brand-crimson cursor-pointer border-0 bg-transparent flex items-center justify-center"
+                                  className="px-2.5 py-2 hover:bg-brand-crimson/15 text-brand-crimson cursor-pointer border-0 bg-transparent flex items-center justify-center transition-colors"
                                 >
                                   <Plus size={12} className="stroke-[2.5]" />
                                 </button>
@@ -345,9 +349,9 @@ export default function CatalogClient({ initialProducts, userName, storeName, db
                             ) : (
                               <button 
                                 onClick={() => addToCart(p)}
-                                className="px-4 py-2 bg-brand-crimson hover:bg-brand-crimson/95 text-white font-bold rounded-xl text-xs flex items-center gap-1.5 transition-colors cursor-pointer border-0 shadow-sm shadow-brand-crimson/10"
+                                className="px-4 py-2.5 bg-brand-crimson hover:bg-brand-crimson/95 text-white font-bold rounded-2xl text-xs flex items-center gap-1.5 transition-all cursor-pointer border-0 shadow-md shadow-brand-crimson/20 hover:scale-[1.03]"
                               >
-                                <Plus size={12} className="stroke-[2.5]" />
+                                <Plus size={13} className="stroke-[2.5]" />
                                 Add Stock
                               </button>
                             )}

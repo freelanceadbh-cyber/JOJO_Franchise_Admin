@@ -61,14 +61,16 @@ export default async function AdminProductsPage() {
         </header>
 
         {/* Product Registry table */}
-        <div className="p-6 max-w-7xl w-full mx-auto">
-          <div className="p-6 rounded-3xl border border-border bg-card shadow-sm space-y-6">
-            <div className="flex justify-between items-center pb-4 border-b border-border/60">
-              <h2 className="text-sm font-bold text-foreground flex items-center gap-1.5">
-                <Boxes size={16} className="text-brand-crimson" />
+        <div className="p-6 max-w-6xl w-full mx-auto space-y-4">
+          <div className="flex justify-between items-center pb-3 border-b border-border/80">
+            <div className="flex items-center gap-2.5">
+              <h2 className="text-base font-bold text-foreground font-heading flex items-center gap-2">
+                <Boxes size={17} className="text-brand-crimson" />
                 Product Ledger
               </h2>
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-muted/60 text-muted-foreground">{products.length} Items</span>
             </div>
+          </div>
 
             {products.length === 0 ? (
               <div className="py-20 text-center space-y-2">
@@ -166,7 +168,6 @@ export default async function AdminProductsPage() {
                 </table>
               </div>
             )}
-          </div>
         </div>
       </main>
     </div>

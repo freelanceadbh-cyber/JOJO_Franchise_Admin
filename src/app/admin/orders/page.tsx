@@ -120,14 +120,16 @@ export default async function AdminOrdersPage() {
         </header>
 
         {/* Orders Queue table */}
-        <div className="p-8 w-full max-w-[1600px] mx-auto space-y-6">
-          <div className="p-6 rounded-2xl border border-border bg-card shadow-sm space-y-5">
-            <div className="flex justify-between items-center pb-3 border-b border-border">
-              <h2 className="text-base font-bold text-foreground flex items-center gap-2">
-                <History size={18} className="text-brand-crimson" />
+        <div className="p-6 w-full max-w-6xl mx-auto space-y-4">
+          <div className="flex justify-between items-center pb-3 border-b border-border/80">
+            <div className="flex items-center gap-2.5">
+              <h2 className="text-base font-bold text-foreground font-heading flex items-center gap-2">
+                <History size={17} className="text-brand-crimson" />
                 Network Order Registry
               </h2>
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-muted/60 text-muted-foreground">{orders.length} Total</span>
             </div>
+          </div>
 
             {orders.length === 0 ? (
               <div className="py-16 text-center space-y-2">
@@ -272,7 +274,6 @@ export default async function AdminOrdersPage() {
                 </table>
               </div>
             )}
-          </div>
         </div>
       </main>
     </div>
