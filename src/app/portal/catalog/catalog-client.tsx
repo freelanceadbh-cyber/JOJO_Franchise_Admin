@@ -31,6 +31,7 @@ import {
   AlertCircle
 } from 'lucide-react';
 import { CartItem } from '@/types';
+import { calculateTaxBreakdown, GST_PERCENT } from '@/lib/tax';
 import { useToastTheme } from '@/components/providers/toast-theme-provider';
 
 interface ProductData {
@@ -157,8 +158,7 @@ export default function CatalogClient({ initialProducts, userName, storeName, db
   });
 
   const cartSubtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-  const cartGST = cartSubtotal * 0.18;
-  const cartTotal = cartSubtotal + cartGST;
+  const { gstAmount: cartGST, finalAmount: cartTotal } = calculateTaxBreakdown(cartSubtotal);
   const cartItemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
 
   const handleProceedToCheckout = () => {
@@ -418,7 +418,7 @@ export default function CatalogClient({ initialProducts, userName, storeName, db
 
             <div className="flex items-center justify-between pt-4 border-t border-border/60">
               <div className="text-left">
-                <span className="text-[9px] font-bold text-muted-foreground uppercase block">Final Unit Price (Incl. 18% GST)</span>
+                <span className="text-[9px] font-bold text-muted-foreground uppercase block">Final Unit Price (Incl. {GST_PERCENT}% GST)</span>
                 <span className="text-md font-extrabold text-foreground">₹{(selectedProduct.price * 1.18).toFixed(2)}</span>
               </div>
 
@@ -516,7 +516,7 @@ export default function CatalogClient({ initialProducts, userName, storeName, db
                   <span className="font-bold text-foreground">₹{cartSubtotal.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between text-muted-foreground">
-                  <span>GST Liability (18%)</span>
+                  <span>GST Liability ({GST_PERCENT}%)</span>
                   <span className="font-bold text-foreground">₹{cartGST.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between border-t border-border/60 pt-3 text-sm font-bold text-foreground">

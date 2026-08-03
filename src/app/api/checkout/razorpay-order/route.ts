@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { razorpay } from '@/lib/razorpay';
 import { prisma } from '@/lib/prisma';
 import { auth } from '@/auth';
+import { calculateTaxBreakdown } from '@/lib/tax';
 
 export async function POST(req: Request) {
   try {
@@ -96,8 +97,7 @@ export async function POST(req: Request) {
       });
     }
 
-    const gstAmount = subtotal * 0.18;
-    const finalAmount = subtotal + gstAmount;
+    const { gstAmount, finalAmount } = calculateTaxBreakdown(subtotal);
     
     // Amount in paise (Razorpay expects smallest currency unit, e.g. 100 paise = 1 INR)
     const amountInPaise = Math.round(finalAmount * 100);

@@ -21,6 +21,36 @@ async function main() {
   });
   console.log(`Ensured Admin User: ${admin.email}`);
 
+  // 2. Ensure Franchise Owner User
+  const franchisePasswordHash = await bcrypt.hash('FranchisePassword123', salt);
+
+  const franchiseUser = await prisma.user.upsert({
+    where: { email: 'franchise1@jojo.com' },
+    update: {},
+    create: {
+      email: 'franchise1@jojo.com',
+      passwordHash: franchisePasswordHash,
+      name: 'Nandha Kumar',
+      role: 'FRANCHISE_OWNER',
+      status: 'ACTIVE',
+    },
+  });
+  console.log(`Ensured Franchise User: ${franchiseUser.email}`);
+
+  // 3. Ensure Franchise Profile
+  const franchise = await prisma.franchise.upsert({
+    where: { userId: franchiseUser.id },
+    update: {},
+    create: {
+      userId: franchiseUser.id,
+      storeName: 'JoJo Ice Creams - Chennai Central',
+      gstNumber: '33AABCJ1234F1Z5',
+      address: 'Shop No. 12, Express EA Mall, Royapettah, Chennai - 600014',
+      contactNumber: '+91 9876543210',
+    },
+  });
+  console.log(`Ensured Franchise Profile: ${franchise.storeName}`);
+
   // 2. Ensure Official Product Catalog (39 products)
   const productsData = [
     { name: 'Vanilla', category: 'ICE_CREAM', subcategory: 'Regular', flavor: 'Vanilla', description: 'Classic vanilla (60g)', price: 49.00, stock: 200, isAvailable: true, imageUrl: '/images/flavors/Vannila.jpeg' },
@@ -82,7 +112,7 @@ async function main() {
   }
 
   console.log(`Product catalog sync complete. (${createdCount} new products added, ${productsData.length} total catalog items)`);
-  console.log('Seeding complete! Admin HQ is ready: admin@jojo.com (Password: AdminPassword123)');
+  console.log('Seeding complete! Admin: admin@jojo.com (Password: AdminPassword123) | Franchise: franchise1@jojo.com (Password: FranchisePassword123)');
 }
 
 main()

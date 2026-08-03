@@ -5,13 +5,12 @@ import { redirect } from 'next/navigation';
 import { 
   ArrowLeft, 
   ShieldAlert,
-  FileText,
   DollarSign,
   IceCream,
-  Printer
+  Download
 } from 'lucide-react';
 import Link from 'next/link';
-import PrintButton from '@/components/print-button';
+import { GST_PERCENT } from '@/lib/tax';
 
 interface ProformaInvoicePageProps {
   params: Promise<{
@@ -71,21 +70,17 @@ export default async function ProformaInvoiceDetailPage({ params }: ProformaInvo
   const isPending = proforma.status === 'PENDING_PAYMENT';
   const payment = order.payments[0];
 
-  // QR Code pointing to this view page for verification
-  const verificationUrl = `${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/portal/proforma-invoices/${id}`;
-  const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${encodeURIComponent(verificationUrl)}`;
-
   // Financial computations
   const subtotal = Number(order.totalAmount);
-  const cgst = Number(order.gstAmount) / 2; // Split CGST 9%
-  const sgst = Number(order.gstAmount) / 2; // Split SGST 9%
+  const totalQuantity = order.orderItems.reduce((sum, item) => sum + item.quantity, 0);
+  const gstAmount = Number(order.gstAmount);
   const grandTotal = Number(order.finalAmount);
 
   return (
     <div className="min-h-screen bg-background py-8 px-4 font-sans text-xs">
       
       {/* Action Header Panel - Hidden on print */}
-      <div className="max-w-3xl mx-auto mb-6 flex items-center justify-between no-print py-2">
+      <div className="max-w-3xl mx-auto mb-6 flex items-center justify-between py-2">
         <Link 
           href={session.user.role === 'ADMIN' ? '/admin/orders' : '/portal/proforma-invoices'} 
           className="flex items-center gap-1.5 font-bold text-muted-foreground hover:text-brand-crimson transition-colors"
@@ -94,6 +89,13 @@ export default async function ProformaInvoiceDetailPage({ params }: ProformaInvo
           {session.user.role === 'ADMIN' ? 'Back to Admin Orders' : 'Back to Proformas'}
         </Link>
         <div className="flex gap-2">
+          <a
+            href={`/portal/proforma-invoices/${id}/pdf`}
+            className="px-5 py-2 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl text-xs flex items-center gap-1.5 transition-all shadow-xs cursor-pointer border-0"
+          >
+            <Download size={15} />
+            <span>Download PDF</span>
+          </a>
           {isPending && (
             <Link 
               href={`/portal/checkout?orderId=${order.id}`}
@@ -103,19 +105,18 @@ export default async function ProformaInvoiceDetailPage({ params }: ProformaInvo
               Pay Now
             </Link>
           )}
-          <PrintButton className="px-5 py-2 bg-brand-crimson hover:bg-brand-crimson/95 text-white font-bold rounded-xl text-xs flex items-center gap-1.5 transition-all shadow-xs cursor-pointer border-0">
-            <Printer size={15} />
-            <span>Print / Save A4 PDF</span>
-          </PrintButton>
         </div>
       </div>
 
       {/* Printable Invoice Container - Flat & Borderless Document */}
-      <div className="max-w-3xl mx-auto bg-white text-slate-800 p-8 sm:p-12 relative print-container print:p-0">
+      <div className="max-w-3xl mx-auto bg-white text-slate-800 p-8 sm:p-12 relative">
         
         {/* Proforma Top Ribbon Brand */}
         <div className="flex justify-between items-start gap-4 border-b border-slate-200 pb-8">
           <div>
+            <div className="mb-2 inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-700">
+              Proforma No: {proforma.proformaNumber}
+            </div>
             <div className="flex items-center gap-1.5 mb-2">
               <div className="w-8 h-8 rounded-full bg-crimson flex items-center justify-center text-white" style={{ backgroundColor: '#DC143C' }}>
                 <IceCream size={16} className="stroke-[2.5]" />
@@ -135,7 +136,6 @@ export default async function ProformaInvoiceDetailPage({ params }: ProformaInvo
           <div className="text-right">
             <h1 className="text-xl font-black text-slate-900 uppercase tracking-tight">Proforma Invoice</h1>
             <div className="mt-2.5 font-mono space-y-0.5">
-              <p><span className="font-bold text-slate-900">Proforma No:</span> {proforma.proformaNumber}</p>
               <p><span className="font-bold text-slate-500">Date:</span> {new Date(proforma.createdAt).toLocaleDateString('en-IN')}</p>
               <p><span className="font-bold text-slate-500">Valid Until:</span> {new Date(proforma.validUntil).toLocaleDateString('en-IN')}</p>
               <p><span className="font-bold text-slate-500">Status:</span> <span className="font-extrabold uppercase" style={{ color: proforma.status === 'PAID' ? 'green' : proforma.status === 'PENDING_PAYMENT' ? '#D68A00' : 'slate' }}>{proforma.status.replace('_', ' ')}</span></p>
@@ -185,14 +185,14 @@ export default async function ProformaInvoiceDetailPage({ params }: ProformaInvo
                 <th className="pb-3 w-20 text-right">Unit Price</th>
                 <th className="pb-3 w-16 text-right">Qty</th>
                 <th className="pb-3 w-20 text-right">Taxable Val</th>
-                <th className="pb-3 w-20 text-right">Tax (18%)</th>
+                <th className="pb-3 w-20 text-right">Tax ({GST_PERCENT}%)</th>
                 <th className="pb-3 w-24 text-right">Total Price</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
               {order.orderItems.map((item, index) => {
                 const itemTotal = Number(item.priceAtPurchase) * item.quantity;
-                const itemGST = itemTotal * 0.18;
+                const itemGST = itemTotal * GST_PERCENT / 100;
                 const itemGrand = itemTotal + itemGST;
                 return (
                   <tr key={item.id} className="text-slate-700">
@@ -213,23 +213,35 @@ export default async function ProformaInvoiceDetailPage({ params }: ProformaInvo
           </table>
         </div>
 
-        {/* Calculations & QR Code Verification seal */}
+        {/* Calculations & summary */}
         <div className="grid sm:grid-cols-12 gap-8 border-t border-slate-200 pt-8 mt-4 items-center">
           
-          {/* QR Scan Verification */}
-          <div className="sm:col-span-7 flex gap-4 items-center p-4 bg-slate-50 border border-slate-100 rounded-2xl">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img 
-              src={qrCodeUrl} 
-              alt="Verification QR" 
-              className="w-20 h-20 border border-slate-200 bg-white rounded-lg"
-            />
-            <div className="space-y-1">
-              <span className="text-[9px] font-bold text-amber-700 uppercase tracking-wider block">B2B Quotation Seal</span>
-              <p className="text-[10px] text-slate-500 leading-relaxed">
-                Scan this QR code to verify this proforma invoice quotation online or trigger immediate digital settlement via our secure gateway interface.
-              </p>
+          <div className="sm:col-span-7 p-4 bg-slate-50 border border-slate-100 rounded-2xl space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="text-[9px] font-bold text-amber-700 uppercase tracking-wider block">Order Summary</span>
+              <span className="text-[10px] text-slate-500 font-mono">{totalQuantity} qty</span>
             </div>
+            <div className="grid sm:grid-cols-2 gap-3 text-[10px] font-mono">
+              <div className="flex justify-between border-b border-slate-200 pb-2">
+                <span className="text-slate-500">Items Count</span>
+                <span className="font-semibold text-slate-900">{order.orderItems.length}</span>
+              </div>
+              <div className="flex justify-between border-b border-slate-200 pb-2">
+                <span className="text-slate-500">Total Quantity</span>
+                <span className="font-semibold text-slate-900">{totalQuantity}</span>
+              </div>
+              <div className="flex justify-between border-b border-slate-200 pb-2">
+                <span className="text-slate-500">Taxable Value</span>
+                <span className="font-semibold text-slate-900">₹{subtotal.toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between border-b border-slate-200 pb-2">
+                <span className="text-slate-500">GST</span>
+                <span className="font-semibold text-slate-900">₹{gstAmount.toFixed(2)}</span>
+              </div>
+            </div>
+            <p className="text-[10px] text-slate-500 leading-relaxed">
+              Use this proforma invoice to review the order summary before payment settlement and dispatch.
+            </p>
           </div>
 
           {/* Pricing totals */}
@@ -239,12 +251,8 @@ export default async function ProformaInvoiceDetailPage({ params }: ProformaInvo
               <span className="font-semibold text-slate-900">₹{subtotal.toFixed(2)}</span>
             </div>
             <div className="flex justify-between">
-              <span>CGST (9.0%):</span>
-              <span className="font-semibold text-slate-900">₹{cgst.toFixed(2)}</span>
-            </div>
-            <div className="flex justify-between">
-              <span>SGST (9.0%):</span>
-              <span className="font-semibold text-slate-900">₹{sgst.toFixed(2)}</span>
+              <span>GST ({GST_PERCENT}%):</span>
+              <span className="font-semibold text-slate-900">₹{gstAmount.toFixed(2)}</span>
             </div>
             <div className="flex justify-between border-t border-slate-300 pt-3 text-sm font-extrabold text-slate-950">
               <span>Grand Total:</span>

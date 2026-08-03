@@ -85,7 +85,7 @@ export default async function ProformaInvoicesPage() {
             </Link>
             <div>
               <h1 className="text-lg font-bold text-foreground">Proforma Invoices</h1>
-              <p className="text-xs text-muted-foreground">Draft order payments requests and quotations.</p>
+              <p className="text-xs text-muted-foreground">Generate a proforma invoice, settle payment, then download the final tax invoice.</p>
             </div>
           </div>
           <div className="flex items-center gap-3">
@@ -180,7 +180,7 @@ export default async function ProformaInvoicesPage() {
                               </Link>
                               
                               <Link 
-                                href={`/portal/proforma-invoices/${pi.id}?print=true`}
+                                href={`/portal/proforma-invoices/${pi.id}/pdf`}
                                 className="px-2.5 py-1 bg-brand-pink/50 hover:bg-brand-pink/80 text-brand-crimson font-bold rounded-lg text-[10px] flex items-center gap-1 cursor-pointer transition-colors"
                               >
                                 <Printer size={10} />

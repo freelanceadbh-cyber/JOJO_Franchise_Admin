@@ -17,6 +17,7 @@ import {
   Phone
 } from 'lucide-react';
 import { CartItem } from '@/types';
+import { calculateTaxBreakdown, GST_PERCENT } from '@/lib/tax';
 
 interface CheckoutClientProps {
   franchiseDetails: {
@@ -87,8 +88,7 @@ export default function CheckoutClient({
 
   // Checkout Subtotals
   const cartSubtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-  const cartGST = cartSubtotal * 0.18; // 18% GST standard
-  const cartTotal = cartSubtotal + cartGST;
+  const { gstAmount: cartGST, finalAmount: cartTotal } = calculateTaxBreakdown(cartSubtotal);
 
   // Process checkout sequence
   const handlePayment = async () => {
@@ -366,7 +366,7 @@ export default function CheckoutClient({
               <span className="font-bold text-foreground">₹{cartSubtotal.toFixed(2)}</span>
             </div>
             <div className="flex justify-between text-muted-foreground">
-              <span>Wholesale GST (18%)</span>
+              <span>Wholesale GST ({GST_PERCENT}%)</span>
               <span className="font-bold text-foreground">₹{cartGST.toFixed(2)}</span>
             </div>
             <div className="flex justify-between border-t border-border/60 pt-4 text-sm font-bold text-foreground">

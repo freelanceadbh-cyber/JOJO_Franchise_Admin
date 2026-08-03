@@ -12,6 +12,7 @@ import {
   Home,
   ShieldCheck
 } from 'lucide-react';
+import { GST_PERCENT } from '@/lib/tax';
 
 interface SuccessPageProps {
   searchParams: Promise<{
@@ -100,7 +101,7 @@ export default async function CheckoutSuccessPage({ searchParams }: SuccessPageP
               <span className="font-semibold text-foreground">₹{Number(order.totalAmount).toFixed(2)}</span>
             </div>
             <div className="flex justify-between text-muted-foreground">
-              <span>GST Liability (18%)</span>
+              <span>GST Liability ({GST_PERCENT}%)</span>
               <span className="font-semibold text-foreground">₹{Number(order.gstAmount).toFixed(2)}</span>
             </div>
             <div className="flex justify-between border-t border-border/60 pt-3 text-sm font-extrabold text-foreground">
@@ -123,6 +124,13 @@ export default async function CheckoutSuccessPage({ searchParams }: SuccessPageP
 
         {/* Dynamic Navigation Options */}
         <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2">
+          <a
+            href={`/portal/orders/${order.id}/invoice/pdf`}
+            className="px-6 py-4 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-2xl text-xs flex items-center justify-center gap-1.5 transition-colors shadow-lg shadow-slate-900/15 cursor-pointer"
+          >
+            <FileText size={14} />
+            Download Invoice PDF
+          </a>
           <Link 
             href="/portal"
             className="px-6 py-4 bg-muted hover:bg-muted/80 text-foreground font-bold rounded-2xl text-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer"

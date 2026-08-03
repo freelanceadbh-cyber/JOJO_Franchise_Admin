@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import AdminSidebar from '@/components/admin-sidebar';
+import DispatchWithDateForm from '@/components/dispatch-with-date-form';
 
 // Server Action to update order status dynamically
 async function updateStatus(orderId: string, newStatus: string) {
@@ -42,6 +43,25 @@ async function updateStatus(orderId: string, newStatus: string) {
     revalidatePath('/admin');
   } catch (error) {
     console.error('Failed to update order status:', error);
+  }
+}
+
+// Server Action to dispatch with estimated delivery date
+async function dispatchWithDate(orderId: string, estimatedDeliveryDate: string) {
+  'use server';
+  try {
+    await prisma.order.update({
+      where: { id: orderId },
+      data: {
+        status: 'DISPATCHED',
+        estimatedDeliveryDate: new Date(estimatedDeliveryDate)
+      }
+    });
+
+    revalidatePath('/admin/orders');
+    revalidatePath('/admin');
+  } catch (error) {
+    console.error('Failed to dispatch order:', error);
   }
 }
 
@@ -234,11 +254,7 @@ export default async function AdminOrdersPage() {
                                 </form>
                               )}
                               {order.status === 'PACKED' && (
-                                <form action={updateStatus.bind(null, order.id, 'DISPATCHED')}>
-                                  <button type="submit" className="px-2 py-1 bg-brand-crimson hover:bg-brand-crimson/95 text-white font-bold rounded-lg text-[9px] cursor-pointer border-0">
-                                    Dispatch
-                                  </button>
-                                </form>
+                                <DispatchWithDateForm orderId={order.id} />
                               )}
                               {order.status === 'DISPATCHED' && (
                                 <form action={updateStatus.bind(null, order.id, 'DELIVERED')}>

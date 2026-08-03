@@ -203,7 +203,7 @@ export default async function Home() {
               </div>
               <h3 className="text-xl font-bold text-foreground">Instant Invoices</h3>
               <p className="text-sm text-muted-foreground leading-relaxed">
-                Retrieve 18% GST compliant PDF invoices, automatically generated after checkout completes. No manual request needed.
+                Retrieve 5% GST compliant PDF invoices, automatically generated after checkout completes. No manual request needed.
               </p>
             </div>
           </div>
@@ -300,7 +300,7 @@ export default async function Home() {
             <h4 className="text-xs font-bold uppercase text-white tracking-widest mb-4">System Logistics</h4>
             <div className="space-y-2 text-[10px] text-muted-foreground leading-relaxed">
               <div>Secure Payment Gateway: Razorpay SSL Verified</div>
-              <div>Invoice Engine: Compliant GST 18%</div>
+              <div>Invoice Engine: Compliant GST 5%</div>
               <div>Next.js 15 • PostgreSQL DB • Auth.js v5</div>
             </div>
           </div>

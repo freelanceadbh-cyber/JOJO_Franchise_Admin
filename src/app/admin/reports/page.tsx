@@ -143,7 +143,7 @@ export default async function AdminReportsPage() {
               </div>
               <div>
                 <h3 className="text-2xl font-black text-foreground">₹{totalGST.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</h3>
-                <p className="text-[10px] text-muted-foreground mt-1">Based on 18% standard wholesale rate</p>
+                <p className="text-[10px] text-muted-foreground mt-1">Based on 5% standard wholesale rate</p>
               </div>
             </div>
 

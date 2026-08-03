@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import crypto from 'crypto';
 import { prisma } from '@/lib/prisma';
 import { auth } from '@/auth';
+import { calculateTaxBreakdown } from '@/lib/tax';
 
 export async function POST(req: Request) {
   try {
@@ -76,8 +77,7 @@ export async function POST(req: Request) {
       });
     }
 
-    const gstAmount = subtotal * 0.18;
-    const finalAmount = subtotal + gstAmount;
+    const { gstAmount, finalAmount } = calculateTaxBreakdown(subtotal);
 
     // 4. Find and Update the existing Order and Proforma Invoice
     const order = await prisma.order.findUnique({
@@ -146,7 +146,7 @@ export async function POST(req: Request) {
       data: {
         orderId: order.id,
         invoiceNumber,
-        gstDetails: 'CGST 9% + SGST 9%',
+          gstDetails: 'GST 5%',
       }
     });
 

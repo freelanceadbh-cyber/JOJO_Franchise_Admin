@@ -18,7 +18,8 @@ import {
   Megaphone,
   Activity,
   ArrowRight,
-  TrendingUp
+  TrendingUp,
+  Calendar
 } from 'lucide-react';
 import Link from 'next/link';
 import PortalHeaderActions from '@/components/portal-header-actions';
@@ -35,6 +36,14 @@ async function getRecentOrders(franchiseId: string) {
     where: { franchiseId },
     take: 5,
     orderBy: { createdAt: 'desc' },
+    select: {
+      id: true,
+      createdAt: true,
+      finalAmount: true,
+      status: true,
+      paymentStatus: true,
+      estimatedDeliveryDate: true
+    }
   });
 }
 
@@ -227,15 +236,16 @@ export default async function PortalDashboard() {
                 ) : (
                   <div className="overflow-x-auto">
                     <table className="w-full text-left text-sm border-collapse min-w-[500px]">
-                      <thead>
-                        <tr className="border-b border-border/60 text-xs font-bold text-muted-foreground uppercase tracking-wider">
-                          <th className="pb-3 pt-1">Order ID</th>
-                          <th className="pb-3 pt-1">Date</th>
-                          <th className="pb-3 pt-1 text-right">Invoice Total</th>
-                          <th className="pb-3 pt-1 text-center">Status</th>
-                          <th className="pb-3 pt-1 text-center">Tax Invoice</th>
-                        </tr>
-                      </thead>
+                       <thead>
+                         <tr className="border-b border-border/60 text-xs font-bold text-muted-foreground uppercase tracking-wider">
+                           <th className="pb-3 pt-1">Order ID</th>
+                           <th className="pb-3 pt-1">Date</th>
+                           <th className="pb-3 pt-1 text-right">Invoice Total</th>
+                           <th className="pb-3 pt-1 text-center">Status</th>
+                           <th className="pb-3 pt-1 text-center">Est. Delivery</th>
+                           <th className="pb-3 pt-1 text-center">Tax Invoice</th>
+                         </tr>
+                       </thead>
                       <tbody className="divide-y divide-border/40">
                         {recentOrders.map((order) => (
                           <tr key={order.id} className="hover:bg-muted/20 transition-colors">
@@ -252,16 +262,30 @@ export default async function PortalDashboard() {
                             <td className="py-3 text-right font-extrabold text-foreground font-mono text-sm">
                               ₹{Number(order.finalAmount).toFixed(2)}
                             </td>
-                            <td className="py-3 text-center">
-                              <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold tracking-wide uppercase ${
-                                order.status === 'DELIVERED' ? 'bg-green-100 text-green-700 dark:bg-green-950/40 dark:text-green-400' :
-                                order.status === 'CANCELLED' ? 'bg-red-100 text-red-700 dark:bg-red-950/40 dark:text-red-400' :
-                                order.status === 'PENDING' ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-950/40 dark:text-yellow-400' :
-                                'bg-blue-100 text-blue-700 dark:bg-blue-950/40 dark:text-blue-400'
-                              }`}>
-                                {order.status}
-                              </span>
-                            </td>
+                             <td className="py-3 text-center">
+                               <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold tracking-wide uppercase ${
+                                 order.status === 'DELIVERED' ? 'bg-green-100 text-green-700 dark:bg-green-950/40 dark:text-green-400' :
+                                 order.status === 'CANCELLED' ? 'bg-red-100 text-red-700 dark:bg-red-950/40 dark:text-red-400' :
+                                 order.status === 'PENDING' ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-950/40 dark:text-yellow-400' :
+                                 'bg-blue-100 text-blue-700 dark:bg-blue-950/40 dark:text-blue-400'
+                               }`}>
+                                 {order.status}
+                               </span>
+                             </td>
+                             <td className="py-3 text-center">
+                               {order.estimatedDeliveryDate ? (
+                                 <span className="inline-flex items-center gap-1 px-2 py-1 bg-brand-pink/50 text-brand-crimson rounded-lg text-[10px] font-bold">
+                                   <Calendar size={10} />
+                                   {new Date(order.estimatedDeliveryDate).toLocaleDateString('en-IN', {
+                                     day: 'numeric',
+                                     month: 'short',
+                                     year: 'numeric'
+                                   })}
+                                 </span>
+                               ) : (
+                                 <span className="text-[10px] text-muted-foreground italic">Not scheduled</span>
+                               )}
+                             </td>
                             <td className="py-3 text-center">
                               {order.paymentStatus === 'PAID' ? (
                                 <Link 

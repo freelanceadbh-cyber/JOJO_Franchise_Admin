@@ -21,7 +21,6 @@ import PortalSidebar from '@/components/portal-sidebar';
 import Link from 'next/link';
 
 async function getFranchiseOrders(userId: string) {
-  // Find mapped franchise profile first
   const franchise = await prisma.franchise.findUnique({
     where: { userId }
   });
@@ -110,14 +109,15 @@ export default async function OrderHistoryPage() {
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-xs border-collapse min-w-[600px]">
                   <thead>
-                    <tr className="border-b border-border/60 text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
-                      <th className="pb-2.5 pt-1 w-32">Order ID</th>
-                      <th className="pb-2.5 pt-1 w-32">Date Placed</th>
-                      <th className="pb-2.5 pt-1 w-28 text-right">Items Quantity</th>
-                      <th className="pb-2.5 pt-1 w-32 text-right">Fulfillment Total</th>
-                      <th className="pb-2.5 pt-1 w-28 text-center">Fulfillment</th>
-                      <th className="pb-2.5 pt-1 text-center w-52">Operational Actions</th>
-                    </tr>
+                       <tr className="border-b border-border/60 text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
+                       <th className="pb-2.5 pt-1 w-32">Order ID</th>
+                       <th className="pb-2.5 pt-1 w-32">Date Placed</th>
+                       <th className="pb-2.5 pt-1 w-28 text-right">Items Quantity</th>
+                       <th className="pb-2.5 pt-1 w-32 text-right">Fulfillment Total</th>
+                       <th className="pb-2.5 pt-1 w-28 text-center">Fulfillment</th>
+                       <th className="pb-2.5 pt-1 text-center w-40">Est. Delivery</th>
+                       <th className="pb-2.5 pt-1 text-center w-52">Operational Actions</th>
+                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border/40">
                     {orders.map((order) => {
@@ -141,16 +141,30 @@ export default async function OrderHistoryPage() {
                           <td className="py-2.5 text-right font-extrabold text-foreground font-mono">
                             ₹{Number(order.finalAmount).toFixed(2)}
                           </td>
-                          <td className="py-2.5 text-center">
-                            <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold tracking-wide uppercase ${
-                              order.status === 'DELIVERED' ? 'bg-green-100 text-green-700 dark:bg-green-950/40 dark:text-green-400' :
-                              order.status === 'CANCELLED' ? 'bg-red-100 text-red-700 dark:bg-red-950/40 dark:text-red-400' :
-                              order.status === 'PENDING' ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-950/40 dark:text-yellow-400' :
-                              'bg-blue-100 text-blue-700 dark:bg-blue-950/40 dark:text-blue-400'
-                            }`}>
-                              {order.status}
-                            </span>
-                          </td>
+                           <td className="py-2.5 text-center">
+                             <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold tracking-wide uppercase ${
+                               order.status === 'DELIVERED' ? 'bg-green-100 text-green-700 dark:bg-green-950/40 dark:text-green-400' :
+                               order.status === 'CANCELLED' ? 'bg-red-100 text-red-700 dark:bg-red-950/40 dark:text-red-400' :
+                               order.status === 'PENDING' ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-950/40 dark:text-yellow-400' :
+                               'bg-blue-100 text-blue-700 dark:bg-blue-950/40 dark:text-blue-400'
+                             }`}>
+                               {order.status}
+                             </span>
+                           </td>
+                           <td className="py-2.5 text-center">
+                             {order.estimatedDeliveryDate ? (
+                               <span className="inline-flex items-center gap-1 px-2 py-1 bg-brand-pink/50 text-brand-crimson rounded-lg text-[10px] font-bold">
+                                 <Calendar size={10} />
+                                 {new Date(order.estimatedDeliveryDate).toLocaleDateString('en-IN', {
+                                   day: 'numeric',
+                                   month: 'short',
+                                   year: 'numeric'
+                                 })}
+                               </span>
+                             ) : (
+                               <span className="text-[10px] text-muted-foreground italic">Not scheduled</span>
+                             )}
+                           </td>
                           <td className="py-2.5">
                             <div className="flex items-center justify-center gap-2">
                               <Link 

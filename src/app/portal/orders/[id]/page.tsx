@@ -17,6 +17,7 @@ import {
   FileSpreadsheet
 } from 'lucide-react';
 import Link from 'next/link';
+import { GST_PERCENT } from '@/lib/tax';
 
 interface TrackingPageProps {
   params: Promise<{
@@ -195,7 +196,7 @@ export default async function OrderTrackingPage({ params }: TrackingPageProps) {
               </div>
               <div className="flex justify-between text-muted-foreground">
                 <span>GST Tax Class:</span>
-                <span className="font-bold text-foreground">CGST + SGST (18%)</span>
+                <span className="font-bold text-foreground">GST ({GST_PERCENT}%)</span>
               </div>
               <div className="flex justify-between border-t border-border/50 pt-3.5 text-muted-foreground">
                 <span>Est. Delivery:</span>
