@@ -1,6 +1,7 @@
 import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
 import PDFDocument from 'pdfkit';
+import path from 'path';
 
 export const runtime = 'nodejs';
 
@@ -17,37 +18,47 @@ export async function GET(
   _request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const session = await auth();
-  if (!session?.user) {
-    return new Response('Unauthorized', { status: 401 });
-  }
+  try {
+    const session = await auth();
+    if (!session?.user) {
+      return new Response('Unauthorized', { status: 401 });
+    }
 
-  const { id } = await params;
+    const { id } = await params;
 
-  const proforma = await prisma.proformaInvoice.findUnique({
-    where: { id },
-    include: {
-      order: {
-        include: {
-          franchise: true,
-          orderItems: {
-            include: { product: true }
+    const proforma = await prisma.proformaInvoice.findUnique({
+      where: { id },
+      include: {
+        order: {
+          include: {
+            franchise: true,
+            orderItems: {
+              include: { product: true }
+            }
           }
         }
       }
+    });
+
+    if (!proforma) {
+      return new Response('Proforma invoice not found', { status: 404 });
     }
-  });
 
-  if (!proforma) {
-    return new Response('Proforma invoice not found', { status: 404 });
-  }
+    if (session.user.role !== 'ADMIN' && proforma.order.franchise.userId !== session.user.id) {
+      return new Response('Forbidden', { status: 403 });
+    }
 
-  if (session.user.role !== 'ADMIN' && proforma.order.franchise.userId !== session.user.id) {
-    return new Response('Forbidden', { status: 403 });
-  }
+    const doc = new PDFDocument({ size: 'A4', margin: 42 });
+    const pdfPromise = createPdfBuffer(doc);
 
-  const doc = new PDFDocument({ size: 'A4', margin: 42 });
-  const pdfPromise = createPdfBuffer(doc);
+    // Use a bundled font to avoid PDFKit AFM file resolution errors in the Next.js dev server
+    try {
+      const fontPath = path.join(process.cwd(), 'public', 'fonts', 'Oceanwide-Semibold.otf');
+      doc.font(fontPath);
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.warn('[proforma.pdf] failed to load bundled font, falling back to default:', (e as any)?.message ?? e);
+    }
 
   const subtotal = Number(proforma.order.totalAmount);
   const gstAmount = Number(proforma.order.gstAmount);
@@ -132,4 +143,9 @@ export async function GET(
       'Cache-Control': 'no-store',
     },
   });
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.error('[proforma.pdf] generation error', err);
+    return new Response('Internal Server Error', { status: 500 });
+  }
 }

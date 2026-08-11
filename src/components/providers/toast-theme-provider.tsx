@@ -24,7 +24,16 @@ const ToastThemeContext = createContext<ToastThemeContextType | undefined>(undef
 export function useToastTheme() {
   const context = useContext(ToastThemeContext);
   if (!context) {
-    throw new Error('useToastTheme must be used within a ToastThemeProvider');
+    // Provide a safe fallback to avoid runtime crashes when the provider
+    // is not present (e.g., during certain server render paths).
+    // This keeps the app resilient while preserving UX where possible.
+    return {
+      theme: 'light',
+      toggleTheme: () => {},
+      toasts: [],
+      showToast: () => {},
+      removeToast: () => {},
+    } as ToastThemeContextType;
   }
   return context;
 }

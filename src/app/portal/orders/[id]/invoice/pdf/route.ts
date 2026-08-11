@@ -1,6 +1,7 @@
 import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
 import PDFDocument from 'pdfkit';
+import path from 'path';
 
 export const runtime = 'nodejs';
 
@@ -17,34 +18,85 @@ export async function GET(
   _request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const session = await auth();
-  if (!session?.user) {
-    return new Response('Unauthorized', { status: 401 });
-  }
-
-  const { id } = await params;
-
-  const order = await prisma.order.findUnique({
-    where: { id },
-    include: {
-      franchise: true,
-      invoice: true,
-      orderItems: {
-        include: { product: true }
-      },
-      payments: true
+  try {
+    const session = await auth();
+    if (!session?.user) {
+      return new Response('Unauthorized', { status: 401 });
     }
-  });
 
-  if (!order || !order.invoice) {
-    return new Response('Invoice not found', { status: 404 });
-  }
+    const { id } = await params;
 
-  if (session.user.role !== 'ADMIN' && order.franchise.userId !== session.user.id) {
-    return new Response('Forbidden', { status: 403 });
-  }
+    let order = await prisma.order.findUnique({
+      where: { id },
+      include: {
+        franchise: true,
+        invoice: true,
+        orderItems: {
+          include: { product: true }
+        },
+        payments: true
+      }
+    });
+
+    if (!order) {
+      return new Response('Order not found', { status: 404 });
+    }
+
+    // If invoice missing but payment exists, auto-create the invoice so download works.
+    const hasPaid = order.payments && order.payments.some((p) => p.status === 'PAID');
+    if (!order.invoice && hasPaid) {
+      // Generate next invoice number
+      const lastInvoice = await prisma.invoice.findFirst({ orderBy: { createdAt: 'desc' } });
+      let nextNum = 1;
+      if (lastInvoice) {
+        try {
+          const lastNumString = lastInvoice.invoiceNumber.split('-')[2];
+          const lastNum = parseInt(lastNumString, 10);
+          if (!isNaN(lastNum)) nextNum = lastNum + 1;
+        } catch (e) {
+          // ignore parsing errors and fallback to 1
+        }
+      }
+      const invoiceNumber = `INV-2026-${String(nextNum).padStart(4, '0')}`;
+
+      await prisma.invoice.create({
+        data: {
+          orderId: order.id,
+          invoiceNumber,
+          gstDetails: 'GST 5%'
+        }
+      });
+
+      // Re-load order with invoice
+      order = await prisma.order.findUnique({
+        where: { id },
+        include: {
+          franchise: true,
+          invoice: true,
+          orderItems: { include: { product: true } },
+          payments: true
+        }
+      });
+    }
+
+    if (!order || !order.invoice) {
+      return new Response('Invoice not found', { status: 404 });
+    }
+
+    if (session.user.role !== 'ADMIN' && order.franchise.userId !== session.user.id) {
+      return new Response('Forbidden', { status: 403 });
+    }
 
   const doc = new PDFDocument({ size: 'A4', margin: 42, bufferPages: true });
+  // Prefer using a bundled TTF/OTF font to avoid AFM lookups (which can fail in Next's dev build)
+  try {
+    const fontPath = path.join(process.cwd(), 'public', 'fonts', 'Oceanwide-Semibold.otf');
+    doc.font(fontPath);
+  } catch (e) {
+    // fallback to default - PDFKit may attempt to load AFM files
+    // eslint-disable-next-line no-console
+    console.warn('[invoice.pdf] failed to load bundled font, falling back to default:', (e as any)?.message ?? e);
+  }
   const pdfPromise = createPdfBuffer(doc);
 
   doc.fontSize(18).fillColor('#111827').text('JoJo Ice Creams', { align: 'left' });
@@ -130,4 +182,9 @@ export async function GET(
       'Cache-Control': 'no-store',
     },
   });
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.error('[invoice.pdf] generation error', err);
+    return new Response('Internal Server Error', { status: 500 });
+  }
 }

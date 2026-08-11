@@ -26,7 +26,7 @@ export default async function InvoicePage({ params }: InvoicePageProps) {
   const { id } = await params;
 
   // Fetch order details with associated invoice, items, products, and payments
-  const order = await prisma.order.findUnique({
+  let order = await prisma.order.findUnique({
     where: { id },
     include: {
       franchise: {
@@ -36,6 +36,44 @@ export default async function InvoicePage({ params }: InvoicePageProps) {
       orderItems: {
         include: { product: true }
       },
+      payments: true
+    }
+  });
+  // If order exists but invoice is missing and payment is settled, create invoice on-demand
+  if (order && !order.invoice) {
+    const hasPaid = order.payments && order.payments.some((p) => p.status === 'PAID');
+    if (hasPaid) {
+      try {
+        const lastInvoice = await prisma.invoice.findFirst({ orderBy: { createdAt: 'desc' } });
+        let nextNum = 1;
+        if (lastInvoice) {
+          try {
+            const lastNumString = lastInvoice.invoiceNumber.split('-')[2];
+            const lastNum = parseInt(lastNumString, 10);
+            if (!isNaN(lastNum)) nextNum = lastNum + 1;
+          } catch (e) {
+            // ignore
+          }
+        }
+        const invoiceNumber = `INV-2026-${String(nextNum).padStart(4, '0')}`;
+        await prisma.invoice.create({ data: { orderId: order.id, invoiceNumber, gstDetails: 'GST 5%' } });
+        // reload order
+        // eslint-disable-next-line no-param-reassign
+      } catch (e) {
+        // ignore creation error; fallthrough to not-found UI
+        // eslint-disable-next-line no-console
+        console.error('[invoice.page] failed to create invoice on-demand', e);
+      }
+    }
+  }
+
+  // refetch order to pick up newly created invoice (if any)
+  order = await prisma.order.findUnique({
+    where: { id },
+    include: {
+      franchise: { include: { user: true } },
+      invoice: true,
+      orderItems: { include: { product: true } },
       payments: true
     }
   });

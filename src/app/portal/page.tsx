@@ -26,55 +26,85 @@ import PortalHeaderActions from '@/components/portal-header-actions';
 import PortalSidebar from '@/components/portal-sidebar';
 
 async function getFranchiseData(userId: string) {
-  return await prisma.franchise.findUnique({
-    where: { userId },
-  });
+  try {
+    return await prisma.franchise.findUnique({
+      where: { userId },
+    });
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.error('[getFranchiseData] DB error:', (error as any)?.message ?? error);
+    return null;
+  }
 }
 
 async function getRecentOrders(franchiseId: string) {
-  return await prisma.order.findMany({
-    where: { franchiseId },
-    take: 5,
-    orderBy: { createdAt: 'desc' },
-    select: {
-      id: true,
-      createdAt: true,
-      finalAmount: true,
-      status: true,
-      paymentStatus: true,
-      estimatedDeliveryDate: true
-    }
-  });
+  try {
+    return await prisma.order.findMany({
+      where: { franchiseId },
+      take: 5,
+      orderBy: { createdAt: 'desc' },
+      select: {
+        id: true,
+        createdAt: true,
+        finalAmount: true,
+        status: true,
+        paymentStatus: true,
+        estimatedDeliveryDate: true
+      }
+    });
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.error('[getRecentOrders] DB error:', (error as any)?.message ?? error);
+    return [];
+  }
 }
 
 async function getNotifications(userId: string) {
-  return await prisma.notification.findMany({
-    where: { userId },
-    orderBy: { createdAt: 'desc' },
-    take: 10
-  });
+  try {
+    return await prisma.notification.findMany({
+      where: { userId },
+      orderBy: { createdAt: 'desc' },
+      take: 10
+    });
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.error('[getNotifications] DB error:', (error as any)?.message ?? error);
+    return [];
+  }
 }
 
 async function getAnnouncements(userId: string) {
-  return await prisma.notification.findMany({
-    where: { userId, type: 'SYSTEM' },
-    orderBy: { createdAt: 'desc' },
-    take: 3
-  });
+  try {
+    return await prisma.notification.findMany({
+      where: { userId, type: 'SYSTEM' },
+      orderBy: { createdAt: 'desc' },
+      take: 3
+    });
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.error('[getAnnouncements] DB error:', (error as any)?.message ?? error);
+    return [];
+  }
 }
 
 async function getActivities(userId: string) {
-  return await prisma.notification.findMany({
-    where: { 
-      userId,
-      OR: [
-        { type: 'ORDER' },
-        { type: 'PAYMENT' }
-      ]
-    },
-    orderBy: { createdAt: 'desc' },
-    take: 5
-  });
+  try {
+    return await prisma.notification.findMany({
+      where: { 
+        userId,
+        OR: [
+          { type: 'ORDER' },
+          { type: 'PAYMENT' }
+        ]
+      },
+      orderBy: { createdAt: 'desc' },
+      take: 5
+    });
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.error('[getActivities] DB error:', (error as any)?.message ?? error);
+    return [];
+  }
 }
 
 export default async function PortalDashboard() {

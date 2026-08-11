@@ -58,9 +58,9 @@ model Order {
   gstAmount             Decimal
   finalAmount           Decimal
   paymentStatus         String           @default("PENDING")
-  estimatedDeliveryDate DateTime?
   createdAt             DateTime         @default(now())
   updatedAt             DateTime         @updatedAt
+  estimatedDeliveryDate DateTime?
   invoice               Invoice?
   franchise             Franchise        @relation(fields: [franchiseId], references: [id], onDelete: Cascade)
   orderItems            OrderItem[]
