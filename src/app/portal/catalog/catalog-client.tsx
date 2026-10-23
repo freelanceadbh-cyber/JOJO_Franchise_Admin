@@ -91,6 +91,18 @@ export default function CatalogClient({ initialProducts, userName, storeName, db
     }
   }, [initialProducts]);
 
+  // Handle ESC key to close cart drawer or details modal
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setCartOpen(false);
+        setSelectedProduct(null);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
   const saveCartToStorage = (updatedCart: CartItem[]) => {
     setCart(updatedCart);
     localStorage.setItem('jojo_cart_items', JSON.stringify(updatedCart));
@@ -181,12 +193,12 @@ export default function CatalogClient({ initialProducts, userName, storeName, db
   }, [] as { subcategory: string; products: ProductData[] }[]);
 
   return (
-    <div className="min-h-screen flex bg-[#FFFDF9] dark:bg-[#0E0709] font-sans relative overflow-x-hidden">
+    <div className="min-h-screen flex flex-col lg:flex-row bg-background text-foreground font-sans relative overflow-x-hidden">
       <PortalSidebar user={{ name: userName }} />
 
       {/* ===== MAIN CONTENT ===== */}
       <main className="flex-1 flex flex-col min-w-0 overflow-y-auto">
-        <header className="h-20 border-b border-border px-6 flex items-center justify-between bg-card flex-shrink-0">
+        <header className="h-20 border-b border-border px-6 flex items-center justify-between bg-card shrink-0">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-full bg-brand-pink flex items-center justify-center text-brand-crimson lg:hidden">
               <IceCream size={16} />
@@ -200,12 +212,14 @@ export default function CatalogClient({ initialProducts, userName, storeName, db
           <div className="flex items-center gap-3">
             <button 
               onClick={() => setCartOpen(true)}
-              className="px-5 py-2.5 bg-brand-crimson hover:bg-brand-crimson/95 text-white font-bold rounded-full text-xs shadow-md shadow-brand-crimson/15 flex items-center gap-2 hover:scale-[1.03] transition-all cursor-pointer relative"
+              aria-expanded={cartOpen}
+              aria-label={`Open shopping cart with ${cartItemCount} items`}
+              className="px-5 py-2.5 bg-brand-crimson hover:bg-brand-crimson/95 text-white font-bold rounded-full text-xs shadow-md shadow-brand-crimson/15 flex items-center gap-2 hover:scale-[1.03] transition-all cursor-pointer relative min-h-[38px]"
             >
-              <ShoppingCart size={14} className="stroke-[2.5]" />
+              <ShoppingCart size={15} className="stroke-[2.5]" />
               <span>Cart ({cartItemCount})</span>
               {cartItemCount > 0 && (
-                <span className="w-2 h-2 rounded-full bg-yellow-400 absolute top-1 right-1 border-2 border-brand-crimson animate-pulse" />
+                <span className="w-2.5 h-2.5 rounded-full bg-yellow-400 absolute top-1 right-1 border-2 border-brand-crimson animate-pulse" />
               )}
             </button>
           </div>
@@ -439,18 +453,32 @@ export default function CatalogClient({ initialProducts, userName, storeName, db
         </div>
       )}
 
-      {/* ===== SHOPPING CART DRAWER ===== */}
-      <div className={`fixed inset-y-0 right-0 z-50 w-full max-w-md bg-card border-l border-border shadow-2xl flex flex-col transform transition-transform duration-300 ${
-        cartOpen ? 'translate-x-0' : 'translate-x-full'
-      }`}>
-        <header className="h-20 border-b border-border px-6 flex items-center justify-between flex-shrink-0">
+      {/* ===== SHOPPING CART DRAWER BACKDROP & PANEL ===== */}
+      {cartOpen && (
+        <div 
+          className="fixed inset-0 bg-black/50 z-40 backdrop-blur-xs transition-opacity"
+          onClick={() => setCartOpen(false)}
+          aria-hidden="true"
+        />
+      )}
+
+      <div 
+        role="dialog"
+        aria-modal="true"
+        aria-label="Your Order Drawer"
+        className={`fixed inset-y-0 right-0 z-50 w-full max-w-md bg-card border-l border-border shadow-2xl flex flex-col transform transition-transform duration-300 ${
+          cartOpen ? 'translate-x-0' : 'translate-x-full'
+        }`}
+      >
+        <header className="h-20 border-b border-border px-6 flex items-center justify-between shrink-0">
           <div className="flex items-center gap-2 text-foreground">
             <ShoppingCart size={18} className="text-brand-crimson stroke-[2.5]" />
             <h2 className="text-md font-bold uppercase tracking-wider">Your Order Drawer</h2>
           </div>
           <button 
             onClick={() => setCartOpen(false)}
-            className="p-1.5 hover:bg-muted text-muted-foreground rounded-lg transition-colors cursor-pointer border-0 bg-transparent"
+            aria-label="Close cart drawer"
+            className="p-2 hover:bg-muted text-muted-foreground hover:text-foreground rounded-lg transition-colors cursor-pointer border-0 bg-transparent min-h-[36px] min-w-[36px] flex items-center justify-center"
           >
             <X size={18} />
           </button>
@@ -469,7 +497,7 @@ export default function CatalogClient({ initialProducts, userName, storeName, db
             <div className="flex-1 overflow-y-auto p-6 divide-y divide-border/60">
               {cart.map((item) => (
                 <div key={item.productId} className="py-4 first:pt-0 last:pb-0 flex gap-3">
-                  <div className="w-12 h-12 rounded-xl bg-brand-pink flex items-center justify-center text-brand-crimson flex-shrink-0">
+                  <div className="w-12 h-12 rounded-xl bg-brand-pink flex items-center justify-center text-brand-crimson shrink-0">
                     <IceCream size={20} />
                   </div>
                   <div className="flex-1 min-w-0">
@@ -477,9 +505,10 @@ export default function CatalogClient({ initialProducts, userName, storeName, db
                       <h4 className="text-xs font-bold text-foreground truncate">{item.name}</h4>
                       <button 
                         onClick={() => removeFromCart(item.productId)}
-                        className="text-muted-foreground hover:text-red-500 cursor-pointer border-0 bg-transparent"
+                        aria-label={`Remove ${item.name} from cart`}
+                        className="p-1.5 text-muted-foreground hover:text-rose-600 cursor-pointer border-0 bg-transparent min-h-[30px] min-w-[30px] flex items-center justify-center transition-colors rounded-md"
                       >
-                        <Trash2 size={12} />
+                        <Trash2 size={14} />
                       </button>
                     </div>
                     <span className="text-[10px] text-muted-foreground font-semibold">Flavor: {item.flavor}</span>
@@ -489,18 +518,20 @@ export default function CatalogClient({ initialProducts, userName, storeName, db
                       <div className="flex items-center border border-border bg-muted/40 rounded-lg overflow-hidden">
                         <button 
                           onClick={() => decrementQuantity(item.productId)}
-                          className="px-1.5 py-1 text-muted-foreground hover:bg-brand-pink hover:text-brand-crimson cursor-pointer border-0 bg-transparent"
+                          aria-label={`Decrease quantity of ${item.name}`}
+                          className="px-2.5 py-1.5 text-muted-foreground hover:bg-brand-pink hover:text-brand-crimson cursor-pointer border-0 bg-transparent min-h-[32px] min-w-[28px] flex items-center justify-center transition-colors"
                         >
-                          <Minus size={10} className="stroke-[2.5]" />
+                          <Minus size={11} className="stroke-[2.5]" />
                         </button>
-                        <span className="px-2 text-[10px] font-black text-foreground min-w-[15px] text-center">
+                        <span className="px-2.5 text-xs font-black text-foreground min-w-[20px] text-center">
                           {item.quantity}
                         </span>
                         <button 
                           onClick={() => addToCart(initialProducts.find(p => p.id === item.productId)!)}
-                          className="px-1.5 py-1 text-muted-foreground hover:bg-brand-pink hover:text-brand-crimson cursor-pointer border-0 bg-transparent"
+                          aria-label={`Increase quantity of ${item.name}`}
+                          className="px-2.5 py-1.5 text-muted-foreground hover:bg-brand-pink hover:text-brand-crimson cursor-pointer border-0 bg-transparent min-h-[32px] min-w-[28px] flex items-center justify-center transition-colors"
                         >
-                          <Plus size={10} className="stroke-[2.5]" />
+                          <Plus size={11} className="stroke-[2.5]" />
                         </button>
                       </div>
                     </div>

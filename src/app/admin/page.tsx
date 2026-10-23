@@ -175,7 +175,7 @@ export default async function AdminDashboard() {
   } = await getAdminData();
 
   return (
-    <div className="min-h-screen flex bg-[#FFFDF9] dark:bg-[#0E0709] font-sans">
+    <div className="min-h-screen flex flex-col lg:flex-row bg-background text-foreground font-sans">
       <AdminSidebar user={session.user} />
 
       {/* ===== MAIN CONTENT ===== */}

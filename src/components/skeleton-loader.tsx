@@ -2,7 +2,7 @@ import React from 'react';
 
 export default function DashboardSkeleton() {
   return (
-    <div className="min-h-screen flex bg-[#FFFDF9] dark:bg-[#0E0709] font-sans animate-pulse">
+    <div className="min-h-screen flex bg-background text-foreground font-sans animate-pulse">
       
       {/* Sidebar Mockup */}
       <div className="w-64 border-r border-border bg-card hidden lg:flex flex-col p-6 space-y-8">

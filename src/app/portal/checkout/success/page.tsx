@@ -52,7 +52,7 @@ export default async function CheckoutSuccessPage({ searchParams }: SuccessPageP
   const paymentRecord = order.payments[0];
 
   return (
-    <div className="min-h-screen bg-[#FFFDF9] dark:bg-[#0E0709] font-sans flex items-center justify-center p-4">
+    <div className="min-h-screen bg-background text-foreground font-sans flex items-center justify-center p-4">
       <div className="w-full max-w-2xl bg-card border border-border p-8 rounded-[36px] shadow-2xl space-y-8 text-center relative overflow-hidden animate-slide-up">
         {/* Decorative elements */}
         <div className="absolute top-0 left-0 w-full h-2 bg-brand-crimson" />

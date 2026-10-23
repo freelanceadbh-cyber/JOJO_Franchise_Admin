@@ -4,12 +4,12 @@ import Link from 'next/link';
 
 export default function NotFound() {
   return (
-    <div className="min-h-screen bg-[#FFFDF9] dark:bg-[#0E0709] flex items-center justify-center p-6 font-sans">
-      <div className="max-w-md w-full bg-card border border-border p-8 rounded-[36px] shadow-xl text-center space-y-6 animate-scale-in">
+    <div className="min-h-screen bg-background text-foreground flex items-center justify-center p-6 font-sans">
+      <div className="max-w-md w-full bg-card border border-border p-8 rounded-[36px] shadow-xl text-center space-y-6">
         
         {/* Animated Icon Container */}
         <div className="w-16 h-16 rounded-full bg-brand-pink text-brand-crimson flex items-center justify-center mx-auto shadow-inner">
-          <IceCream size={32} className="stroke-[2] animate-bounce-slow" />
+          <IceCream size={32} className="stroke-[2] transition-transform duration-300 hover:scale-105" />
         </div>
 
         <div className="space-y-2">

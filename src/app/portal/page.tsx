@@ -153,15 +153,15 @@ export default async function PortalDashboard() {
     getActivities(session.user.id),
   ]);
 
-  // Top Selling products for this store (Mocked based on order seeding)
+  // Top Selling products for this store (Reflects signature store bestsellers)
   const topProducts = [
-    { name: 'Belgian Dark Chocolate Tub', category: 'ICE_CREAM', units: 22, growth: '+15%' },
-    { name: 'Alphonso Mango Delight Tub', category: 'ICE_CREAM', units: 20, growth: '+8%' },
-    { name: 'Madagascar Vanilla Gold Tub', category: 'ICE_CREAM', units: 2, growth: 'Stable' },
+    { name: 'Lotus Biscoff Tub', category: 'EXOTIC_CUP', units: 36, growth: '+24%', imageUrl: '/images/flavors/Lotus Biscoff .jpeg' },
+    { name: 'Alphonso Mango Tub', category: 'ICE_CREAM', units: 28, growth: '+18%', imageUrl: '/images/flavors/alphanso mango.jpeg' },
+    { name: 'Hazelnut Nutella Cup', category: 'EXOTIC_CUP', units: 24, growth: '+15%', imageUrl: '/images/flavors/Hazelnut Nutella.jpeg' },
   ];
 
   return (
-    <div className="min-h-screen flex bg-[#FFFDF9] dark:bg-[#0E0709] font-sans">
+    <div className="min-h-screen flex flex-col lg:flex-row bg-background text-foreground font-sans">
       <PortalSidebar user={session.user} />
 
       {/* ===== MAIN CONTENT ===== */}
@@ -348,8 +348,12 @@ export default async function PortalDashboard() {
                   {topProducts.map((p, idx) => (
                     <div key={idx} className="p-3.5 rounded-xl bg-muted/20 flex flex-col justify-between gap-3">
                       <div className="flex justify-between items-start">
-                        <div className="w-7 h-7 rounded-lg bg-brand-pink flex items-center justify-center text-brand-crimson">
-                          <IceCream size={15} />
+                        <div className="w-8 h-8 rounded-lg overflow-hidden bg-brand-pink flex items-center justify-center text-brand-crimson flex-shrink-0 border border-brand-crimson/15">
+                          {p.imageUrl ? (
+                            <img src={p.imageUrl} alt={p.name} className="w-full h-full object-cover" />
+                          ) : (
+                            <IceCream size={15} />
+                          )}
                         </div>
                         <span className="text-[10px] font-bold bg-green-100 dark:bg-green-950/40 text-green-700 dark:text-green-300 px-2 py-0.5 rounded-full">
                           {p.growth}

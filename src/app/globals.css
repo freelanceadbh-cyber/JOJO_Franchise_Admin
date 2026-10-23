@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 @import "tailwindcss";
 
 @variant dark (&:where(.dark, .dark *));
@@ -19,9 +20,10 @@
 }
 
 @theme {
-  --font-sans: var(--font-oceanwide), 'Oceanwide', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  --font-heading: var(--font-oceanwide), 'Oceanwide', sans-serif;
-  --font-mono: var(--font-oceanwide), 'Oceanwide', monospace;
+  --font-sans: 'Plus Jakarta Sans', var(--font-oceanwide), 'Oceanwide', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-heading: 'Outfit', var(--font-oceanwide), 'Oceanwide', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-brand: 'Outfit', var(--font-oceanwide), 'Oceanwide', sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 
   --color-border: var(--border);
   --color-input: var(--input);
@@ -74,15 +76,19 @@
 
 /* Custom Base Elements & Classes */
 @layer base {
+  html {
+    scroll-behavior: smooth;
+  }
   * {
     border-color: var(--border);
     outline-color: var(--ring);
   }
   body, p, span, td, th, input, button, select, textarea {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Inter, sans-serif;
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
   }
   h1, h2, h3, h4, h5, h6, .font-heading, .font-brand {
-    font-family: var(--font-oceanwide), 'Oceanwide', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-family: 'Outfit', var(--font-oceanwide), 'Oceanwide', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    letter-spacing: -0.025em;
   }
   body {
     background-color: var(--jojo-bg);
@@ -279,5 +285,108 @@
   background: rgba(14, 7, 9, 0.85);
   backdrop-filter: blur(16px);
   border-bottom: 1px solid rgba(255, 59, 95, 0.06);
+}
+
+/* Intentional Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+  .animate-float,
+  [class*="animate-float"] {
+    animation: none !important;
+    transform: none !important;
+  }
+  .animate-pulse {
+    animation: none !important;
+    opacity: 1 !important;
+  }
+  *, *::before, *::after {
+    animation-duration: 0.001s !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.1s !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Luxury Dessert Theme Utilities */
+.gradient-crimson-text {
+  background: linear-gradient(135deg, #DC143C 0%, #E11D48 50%, #9F1239 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.dark .gradient-crimson-text {
+  background: linear-gradient(135deg, #FF4D6D 0%, #FF758F 60%, #FFA3B3 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.glass-pill {
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(220, 20, 60, 0.15);
+  box-shadow: 0 4px 16px -2px rgba(220, 20, 60, 0.06);
+}
+.dark .glass-pill {
+  background: rgba(24, 13, 17, 0.8);
+  border: 1px solid rgba(255, 77, 109, 0.2);
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.5);
+}
+
+.hero-mesh-glow {
+  background: radial-gradient(circle at 50% 30%, rgba(220, 20, 60, 0.12) 0%, rgba(255, 230, 230, 0.35) 45%, transparent 75%);
+}
+.dark .hero-mesh-glow {
+  background: radial-gradient(circle at 50% 30%, rgba(255, 59, 95, 0.14) 0%, rgba(44, 19, 24, 0.45) 50%, transparent 80%);
+}
+
+.badge-shimmer {
+  position: relative;
+  overflow: hidden;
+}
+.badge-shimmer::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    60deg,
+    transparent 30%,
+    rgba(255, 255, 255, 0.4) 50%,
+    transparent 70%
+  );
+  transform: rotate(25deg) translateY(-100%);
+  animation: shimmer-swipe 6s ease-in-out infinite;
+}
+
+@keyframes shimmer-swipe {
+  0%, 80% {
+    transform: rotate(25deg) translateY(-100%);
+  }
+  100% {
+    transform: rotate(25deg) translateY(100%);
+  }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--jojo-bg);
+}
+::-webkit-scrollbar-thumb {
+  background: #E5D5D8;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #DC143C;
+}
+.dark ::-webkit-scrollbar-thumb {
+  background: #331A21;
+}
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #FF3B5F;
 }
 

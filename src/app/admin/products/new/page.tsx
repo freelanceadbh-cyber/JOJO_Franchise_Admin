@@ -45,7 +45,7 @@ export default async function NewProductPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#FFFDF9] dark:bg-[#0E0709] font-sans pb-16">
+    <div className="min-h-screen bg-background text-foreground font-sans pb-16">
       
       {/* Header bar */}
       <header className="h-20 border-b border-border bg-card px-6 flex items-center justify-between sticky top-0 z-40">

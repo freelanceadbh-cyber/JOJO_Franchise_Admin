@@ -15,7 +15,7 @@ export default function ErrorBoundary({ error, reset }: ErrorProps) {
   }, [error]);
 
   return (
-    <div className="min-h-screen bg-[#FFFDF9] dark:bg-[#0E0709] flex items-center justify-center p-6 font-sans">
+    <div className="min-h-screen bg-background text-foreground flex items-center justify-center p-6 font-sans">
       <div className="max-w-md w-full bg-card border border-border p-8 rounded-[36px] shadow-xl text-center space-y-6 animate-scale-in">
         
         {/* Animated Icon Container */}
